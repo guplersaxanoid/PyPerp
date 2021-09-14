@@ -1,14 +1,20 @@
-class Faucet:
-    def __init__(self):
-        pass 
+import requests
+import json 
 
-    @property
-    def address(self):
-        pass 
-
-    @address.setter
-    def address(self):
-        pass
-
-    def getUSDC(self):
-        pass
+def getUsdcL1(self,address):
+    faucetApiKey = "da2-h4xlnj33zvfnheevfgaw7datae"
+    appSyncId = "izc32tpa5ndllmbql57pcxluua"
+    faucet = f"https://${appSyncId}.appsync-api.ap-northeast-1.amazonaws.com/graphql"
+    headers = {
+        "Content-Type": "application/json",
+        "X-Api-Key": faucetApiKey
+    }
+    body = {
+        query:f'mutation issue {{issue(holderAddr: "{address}"){{\
+                txHashQuote\
+                amountQuote\
+            }}\
+        }}'
+    }
+    r = requests.post(url, data=json.dumps(body), headers=headers)
+    return r 

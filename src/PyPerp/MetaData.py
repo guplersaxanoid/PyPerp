@@ -1,17 +1,34 @@
+import requests
+import json
+
 class MetaData:
-    def __init__(self):
-        pass 
+    def __init__(self, testnet):
+        if testnet:
+            self._store =  "<https://metadata.perp.exchange/staging.json>"
+        else:
+            self._store = "<https://metadata.perp.exchange/production.json>"
+        self.fetchMeta()
 
     @property
     def metadataStore(self):
-        pass 
+        return self._store
 
     @metadataStore.setter
-    def metadataStore(self):
-        pass 
+    def metadataStore(self, s):
+        self._store = s
+        self.fetchMeta()
+    
+    def fetchMeta(self):
+        self.meta = requests.get(self._store).json()
 
-    def getContractAddress(self):
-        pass 
+    def getL1ContractAddress(self, name):
+        return self.meta["layers"]["layer1"]["contracts"][name]["address"]
 
-    def getExtContractAddress(self):
-        pass 
+    def getL2ContractAddress(self, name):
+        return self.meta["layers"]["layer2"]["contracts"][name]["address"]
+
+    def getL1ExtContractAddress(self):
+        return self.meta["layers"]["layer1"]["externalContracts"][name]
+
+    def getL2ExtContractAddress(self):
+        return self.meta["layers"]["layer2"]["externalContracts"][name]
