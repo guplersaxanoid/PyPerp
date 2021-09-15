@@ -5,32 +5,10 @@
 
 class Account:
     def __init__(self,l1provider,l2provider,l1wallet,l2wallet):
-        #todo : validate l1provider
-        self._layer1provider = l1provider
-        #todo : validate l2provider
-        self._layer2provider = l2provider 
         #todo : validate l1wallet
         self._layer1wallet = l1wallet
         #todo : validate l2wallet
         self._layer2wallet = l2wallet
-
-    @property
-    def layer1provider(self):
-        return self._layer1provider
-
-    @layer1provider.setter
-    def layer1provider(self, p):
-        #todo : validate argument
-        self._layer1provider = p
-
-    @property
-    def layer2provider(self):
-        return self._layer2provider
-
-    @layer2provider.setter
-    def layer2provider(self, p):
-        #todo : validate argument
-        self._layer2provider = p
 
     @property
     def layer1wallet(self):
@@ -50,4 +28,11 @@ class Account:
         #todo : validate argument
         self._layer2wallet = w
 
+    @property
+    def layer1WalletAdderss(self):
+        pass 
+
+    @property
+    def layer2WalletAddress(self):
+        pass
     

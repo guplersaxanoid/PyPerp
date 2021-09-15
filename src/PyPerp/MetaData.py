@@ -2,7 +2,7 @@ import requests
 import json
 
 class MetaData:
-    def __init__(self, testnet):
+    def __init__(self, testnet: bool):
         if testnet:
             self._store =  "<https://metadata.perp.exchange/staging.json>"
         else:
