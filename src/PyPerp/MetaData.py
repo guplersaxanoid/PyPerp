@@ -27,8 +27,8 @@ class MetaData:
     def getL2ContractAddress(self, name):
         return self.meta["layers"]["layer2"]["contracts"][name]["address"]
 
-    def getL1ExtContractAddress(self):
+    def getL1ExtContractAddress(self, name):
         return self.meta["layers"]["layer1"]["externalContracts"][name]
 
-    def getL2ExtContractAddress(self):
+    def getL2ExtContractAddress(self, name):
         return self.meta["layers"]["layer2"]["externalContracts"][name]
