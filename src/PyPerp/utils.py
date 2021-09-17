@@ -1,7 +1,7 @@
 import json
 import MetaData
 
-def confirmTransferToLayer2(self, receipt, provider):
+def confirmTransferToLayer2(receipt, provider):
     meta = MetaData(provider.testnet)
     with open("abi/AmbL2.json") as f:
         layer2AmbAbi = json.load(f)
@@ -19,7 +19,7 @@ def confirmTransferToLayer2(self, receipt, provider):
             print("Transfer completed")
             return 
 
-def confirmTransferToLayer1(self, reciept, provider):
+def confirmTransferToLayer1(reciept, provider):
     meta = MetaData(provider.testnet)
     with open("abi/AmbL1.json") as f:
         layer1AmbAbi = json.load(f)
@@ -36,3 +36,21 @@ def confirmTransferToLayer1(self, reciept, provider):
         for c in confirmationFilter:
             print("Transfer completed")
             return 
+
+def getAmm(amm, provider):
+    if provider.testnet:
+            Amms = constant.AvailableAmms["testnet"]
+    else:
+        Amms = constant.AvailableAmms["mainnet"]
+
+    #todo: handle error
+    if amm not in Amms:
+        return None
+
+    meta = MetaData(provider.testnet)
+    AmmAddr = meta.getL2ContractAddress(amm)
+    with open("abi/Amm.json") as f:
+        AmmAbi = json.load(f)
+
+    Amm = provider.l2.eth.contract(address=AmmAddr, abi=AmmAbi)
+    return Amm
