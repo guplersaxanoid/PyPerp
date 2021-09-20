@@ -27,3 +27,7 @@ class Side(Enum):
     LONG = 0
     SHORT = 1
 
+class PnlCalcOption(Enum):
+    SPOT_PRICE = 0
+    TWAP = 1
+

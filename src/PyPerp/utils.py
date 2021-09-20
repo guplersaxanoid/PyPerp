@@ -54,3 +54,23 @@ def getAmm(amm, provider):
 
     Amm = provider.l2.eth.contract(address=AmmAddr, abi=AmmAbi)
     return Amm
+
+def estimateLiquidationPrice(position, amm, clearingHouse):
+    spotPrice = amm.functions.getSpotPricer.call().d
+    realCloseQuoteAmount = amm.functions.getOutputPrice(
+        0 if position.size.d > 0 else 1,
+        json.dumps(f"d: {abs(position.size.d)}")
+    ).call().d
+    maintanenceMarginRatio = clearingHouse.functions.maintanenceMarginRatio().call()
+    openNotional = position.openNotional.d
+    positionSizeAbs = abs(position.size.d)
+    margin = position.margin.d
+    entryPrice = openNotional/positionSizeAbs
+    reverseLeverage = margin/openNotional
+    spotCloseQuoteAmount = spotPrice*positionSizeAbs
+    closePosPriceSlippage = (realCloseQuoteAmount - spotCloseQuoteAmount)/spotCloseQuoteAmount
+    if position.size.d > 0:
+        liquidationPrice =  entryPrice*(1-reverseLeverage-closePosPriceSlippage+maintanenceMarginRatio)
+    else:
+        liquidationPrice = entryPrice*(1+reverseLeverage-closePosPriceSlippage-maintanenceMarginRatio)
+    return liquidationPrice
