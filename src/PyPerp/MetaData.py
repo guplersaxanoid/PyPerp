@@ -4,9 +4,9 @@ import json
 class MetaData:
     def __init__(self, testnet: bool):
         if testnet:
-            self._store =  "<https://metadata.perp.exchange/staging.json>"
+            self._store =  "https://metadata.perp.exchange/staging.json"
         else:
-            self._store = "<https://metadata.perp.exchange/production.json>"
+            self._store = "https://metadata.perp.exchange/production.json"
         self.fetchMeta()
 
     @property

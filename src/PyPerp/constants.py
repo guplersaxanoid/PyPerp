@@ -1,6 +1,6 @@
 from enum import Enum 
 
-MaxUInt256 = None
+MaxUInt256 = 2**256-1
 
 AvailableAmms = {
     "mainnet":[

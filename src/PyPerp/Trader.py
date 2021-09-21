@@ -42,11 +42,8 @@ class Trader:
     def l2WalletBalance(self):
         return self._provider.l2.eth.getBalance(self._layer2wallet.address)
 
-    def depositToxDai(self, amount):
-        #todo: checkl1 balance
-        #todo: do for all available layer1 tokens
-
-        meta = MetaData(self._provider.testnet)
+    def approveL1BridgetoUseUSDC(self):
+        meta = MetaData.MetaData(self._provider.testnet)
         with open("abi/TetherToken.json") as f:
             TetherTokenAbi = json.load(f)
         with open("abi/RootBridge.json") as f:
@@ -55,12 +52,45 @@ class Trader:
         layer1BridgeAddr = meta.getL1ContractAddress("RootBridge")
         layer1Usdc = self._provider.l1.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
         layer1Bridge = self._provider.l1.eth.contract(address=layer1BridgeAddr, abi=RootBridgeAbi)
-        approveTxHash = layer1Usdc.functions.approve(layer1Bridge.address, constants.MaxUInt256).transact()
-        self._provider.l1.eth.wait_for_transaction_receipt(approveTxHash)
-        transferTxHash = layer1Bridge.functions.erc20Transfer(layer1Usdc.address, self._layer1wallet.address ,json.dumps(f"{{d:{amount}}}")).transact()
+        nonce = self._provider.l1.eth.get_transaction_count(self._layer1wallet.address)
+        approveTx = layer1Usdc.functions.approve(layer1BridgeAddr, constants.MaxUInt256).buildTransaction({
+            'nonce':nonce,
+            'gas': 1000000,
+            'gasPrice': self._provider.l1.eth.gasPrice,
+        })
+        signed_tx = self._provider.l1.eth.account.sign_transaction(approveTx, private_key=self._layer1wallet.key)
+        approveTxHash = self._provider.l1.eth.send_raw_transaction(signed_tx.rawTransaction)
+        receipt = self._provider.l1.eth.wait_for_transaction_receipt(approveTxHash)
+        return receipt
+
+    def depositUsdcToxDai(self, amount):
+        #todo: checkl1 balance
+        #todo: do for all available layer1 tokens
+
+        meta = MetaData.MetaData(self._provider.testnet)
+        with open("abi/TetherToken.json") as f:
+            TetherTokenAbi = json.load(f)
+        with open("abi/RootBridge.json") as f:
+            RootBridgeAbi = json.load(f)
+        UsdcAddr = meta.getL1ExtContractAddress("usdc")
+        layer1BridgeAddr = meta.getL1ContractAddress("RootBridge")
+        layer1Usdc = self._provider.l1.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
+        layer1Bridge = self._provider.l1.eth.contract(address=layer1BridgeAddr, abi=RootBridgeAbi)
+        nonce = self._provider.l1.eth.get_transaction_count(self._layer1wallet.address)
+        print(self._provider.l1.eth.gasPrice)
+        transferTx = layer1Bridge.functions.erc20Transfer(layer1Usdc.address, self._layer2wallet.address ,{"d":amount}).buildTransaction({
+            'nonce':nonce,
+            'gas': 1000000,
+            'gasPrice': self._provider.l1.eth.gasPrice,
+        })
+        signed_tx = self._provider.l1.eth.account.sign_transaction(transferTx, private_key=self._layer1wallet.key)
+        #print(signed_tx)
+        #print(self._layer1wallet.key)
+        transferTxHash = self._provider.l1.eth.send_raw_transaction(signed_tx.rawTransaction)
         receipt = self._provider.l1.eth.wait_for_transaction_receipt(transferTxHash)
+        return receipt
     
-    def withdrawToEthereum(self, amount):
+    def withdrawUsdcToEthereum(self, amount):
         #todo: checkl2balance
         #todo: do for all available layer2 tokens
         meta = MetaData(self._provider.testnet)
@@ -74,7 +104,7 @@ class Trader:
         layer2Bridge = self._provider.l2.eth.contract(address=layer2BridgeAddr, abi=ClientBridgeAbi)
         approveTxHash = layer2Usdc.functions.approve(layer2Bridge.address, constants.MaxUInt256).transact()
         self._provider.l1.wait_for_transaction_receipt(approveTxHash)
-        transferTxHash = layer2Brige.functions.erc20Transfer(layer2Usdc.address,self._layer2wallet.address,json.dumps(f"{{d:{amount}}}")).transact()
+        transferTxHash = layer2Brige.functions.erc20Transfer(layer2Usdc.address,self._layer2wallet.address,).transact()
         receipt = self._provider.l2.eth.wait_for_transaction_receipt(transferTxHash)
     
     def openPosition(self, amm, side, quoteAssetAmount: Decimal, leverage: Decimal, baseAssetAmountLimit: Decimal):
