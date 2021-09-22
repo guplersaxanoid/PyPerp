@@ -30,4 +30,5 @@ class Side(Enum):
 class PnlCalcOption(Enum):
     SPOT_PRICE = 0
     TWAP = 1
+    ORACLE = 2
 

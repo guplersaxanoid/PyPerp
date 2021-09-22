@@ -1,5 +1,6 @@
 import json
 import MetaData
+import constants 
 
 def confirmTransferToLayer2(receipt, provider):
     meta = MetaData(provider.testnet)
@@ -39,15 +40,15 @@ def confirmTransferToLayer1(reciept, provider):
 
 def getAmm(amm, provider):
     if provider.testnet:
-            Amms = constant.AvailableAmms["testnet"]
+            Amms = constants.AvailableAmms["testnet"]
     else:
-        Amms = constant.AvailableAmms["mainnet"]
+        Amms = constants.AvailableAmms["mainnet"]
 
     #todo: handle error
     if amm not in Amms:
         return None
 
-    meta = MetaData(provider.testnet)
+    meta = MetaData.MetaData(provider.testnet)
     AmmAddr = meta.getL2ContractAddress(amm)
     with open("abi/Amm.json") as f:
         AmmAbi = json.load(f)
@@ -74,3 +75,9 @@ def estimateLiquidationPrice(position, amm, clearingHouse):
     else:
         liquidationPrice = entryPrice*(1+reverseLeverage-closePosPriceSlippage-maintanenceMarginRatio)
     return liquidationPrice
+
+def parseUnits(amount, decimal):
+    return amount*(10**decimal)
+
+def formatUnits(amount, decimal):
+    return amount/(10**decimal)
