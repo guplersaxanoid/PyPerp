@@ -20,6 +20,17 @@ class Trader:
         self._provider = provider
         self.meta = MetaData.MetaData(provider.testnet)
 
+        clearingHouseAddr = self.meta.getL2ContractAddress("ClearingHouse")
+        with open("abi/ClearingHouse.json") as f:
+            clearingHouseAbi = json.load(f)
+        self.clearingHouse = self._provider.l2.eth.contract(address=clearingHouseAddr, abi=clearingHouseAbi)
+
+        clearingHouseViewerAddr = self.meta.getL2ContractAddress("ClearingHouseViewer")
+        with open("abi/ClearingHouseViewer.json") as f:
+            clearingHouseViewerAbi = json.load(f)
+        self.clearingHouseViewer = self._provider.l2.eth.contract(address=clearingHouseViewerAddr, abi=clearingHouseViewerAbi)
+
+
     @property
     def layer1wallet(self):
         return self._layer1wallet
@@ -77,9 +88,10 @@ class Trader:
         layer1Bridge = self._provider.l1.eth.contract(address=layer1BridgeAddr, abi=RootBridgeAbi)
         nonce = self._provider.l1.eth.get_transaction_count(self._layer1wallet.address)
         #print(self._provider.l1.eth.gasPrice)
+        gasEstimate = layer1Bridge.functions.erc20Transfer(UsdcAddr, self._layer1wallet.address, {'d':parseUnits(amount,18)}).estimateGas() 
         transferTx = layer1Bridge.functions.erc20Transfer(UsdcAddr, self._layer1wallet.address, {'d':parseUnits(amount,18)}).buildTransaction({
             'nonce':nonce,
-            'gas': 1000000,
+            'gas': gasEstimate,
             'gasPrice': self._provider.l1.eth.gasPrice,
         })
         #print(layer1Usdc.functions.allowance(self._layer1wallet.address,layer1BridgeAddr).call())
@@ -98,9 +110,10 @@ class Trader:
         layer2BridgeAddr = self.meta.getL2ContractAddress("ClientBridge")
         layer2Usdc = self._provider.l2.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
+        gasEstimate = layer2Usdc.functions.approve(layer2BridgeAddr, constants.MaxUInt256).estimateGas()
         approveTx = layer2Usdc.functions.approve(layer2BridgeAddr, constants.MaxUInt256).buildTransaction({
             'nonce':nonce,
-            'gas': 1000000,
+            'gas': gasEstimate,
             'gasPrice': self._provider.l2.eth.gasPrice,
         })
         signed_tx = self._provider.l2.eth.account.sign_transaction(approveTx, private_key=self._layer2wallet.key)
@@ -122,13 +135,13 @@ class Trader:
         layer2Usdc = self._provider.l2.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
         layer2Bridge = self._provider.l2.eth.contract(address=layer2BridgeAddr, abi=ClientBridgeAbi)
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
+        gasEstimate = layer2Bridge.functions.erc20Transfer(layer2Usdc.address, self._layer2wallet.address,{'d':parseUnits(amount,constants.DEFAULT_DECIMALS)}).esimateGas()
         transferTx = layer2Bridge.functions.erc20Transfer(layer2Usdc.address, self._layer2wallet.address,{'d':parseUnits(amount,constants.DEFAULT_DECIMALS)}).buildTransaction({
             'nonce':nonce,
-            'gas':1000000,
+            'gas': gasEstimate,
             'gasPrice':self._provider.l2.eth.gasPrice
         })
         signed_tx = self._provider.l2.eth.account.sign_transaction(transferTx, private_key=self._layer2wallet.key)
-
         transferTxHash = self._provider.l2.eth.send_raw_transaction(signed_tx.rawTransaction)
         receipt = self._provider.l2.eth.wait_for_transaction_receipt(transferTxHash)
         return receipt
@@ -141,9 +154,10 @@ class Trader:
         ClearingHouseAddr = self.meta.getL2ContractAddress("ClearingHouse")
         layer2Usdc = self._provider.l2.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
+        gasEstimate = layer2Usdc.functions.approve(ClearingHouseAddr, constants.MaxUInt256).estimateGas()
         tx = layer2Usdc.functions.approve(ClearingHouseAddr, constants.MaxUInt256).buildTransaction({
             'nonce':nonce,
-            'gas':1000000,
+            'gas': gasEstimate,
             'gasPrice':self._provider.l2.eth.gasPrice
         })
         signed_tx = self._provider.l2.eth.account.sign_transaction(tx,private_key=self._layer2wallet.key)
@@ -166,17 +180,12 @@ class Trader:
             raise ValueError("leverage must be in the range (0,10]")
 
         Amm = getAmm(pair,self._provider)
-        if Amm == None:
-            raise ValueError(f"The pair {pair} is not available")
 
-        clearingHouseAddr = self.meta.getL2ContractAddress("ClearingHouse")
-        with open("abi/ClearingHouse.json") as f:
-            clearingHouseAbi = json.load(f)
-        clearingHouse = self._provider.l2.eth.contract(address=clearingHouseAddr, abi=clearingHouseAbi)
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
-        tx = clearingHouse.functions.openPosition(Amm.address, side, {'d': parseUnits(quoteAssetAmount,18)}, {'d':parseUnits(leverage,18)}, {'d':parseUnits(baseAssetAmountLimit,18)}).buildTransaction({
+        gasEstimate = self.clearingHouse.functions.openPosition(Amm.address, side, {'d': parseUnits(quoteAssetAmount,18)}, {'d':parseUnits(leverage,18)}, {'d':parseUnits(baseAssetAmountLimit,18)}).estimateGas() 
+        tx = self.clearingHouse.functions.openPosition(Amm.address, side, {'d': parseUnits(quoteAssetAmount,18)}, {'d':parseUnits(leverage,18)}, {'d':parseUnits(baseAssetAmountLimit,18)}).buildTransaction({
             'nonce':nonce,
-            'gas':1000000,
+            'gas': gasEstimate,
             'gasPrice':self._provider.l2.eth.gasPrice
         })
         signed_tx = self._provider.l2.eth.account.sign_transaction(tx,private_key=self._layer2wallet.key)
@@ -187,18 +196,12 @@ class Trader:
     def closePosition(self, pair, quoteAssetAmountLimit):
         
         Amm = getAmm(pair,self._provider)
-        if Amm == None:
-            return 
         
-        clearingHouseAddr = self.meta.getL2ContractAddress("ClearingHouse")
-        with open("abi/ClearingHouse.json") as f:
-            clearingHouseAbi = json.load(f)
-        clearingHouse = self._provider.l2.eth.contract(address=clearingHouseAddr, abi=clearingHouseAbi)
-
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
-        tx  = clearingHouse.functions.closePosition(Amm.address, {"d":parseUnits(quoteAssetAmountLimit,constants.DEFAULT_DECIMALS)}).buildTransaction({
+        gasEstimate = self.clearingHouse.functions.closePosition(Amm.address, {"d":parseUnits(quoteAssetAmountLimit,constants.DEFAULT_DECIMALS)}).estimateGas()
+        tx  = self.clearingHouse.functions.closePosition(Amm.address, {"d":parseUnits(quoteAssetAmountLimit,constants.DEFAULT_DECIMALS)}).buildTransaction({
             'nonce':nonce,
-            'gas':1000000,
+            'gas': gasEstimate,
             'gasPrice':self._provider.l2.eth.gasPrice
         })
         signed_tx = self._provider.l2.eth.account.sign_transaction(tx,private_key=self._layer2wallet.key)
@@ -209,17 +212,11 @@ class Trader:
     def getPersonalPositionWithFundingPayment(self, pair, trader=None):
         #note: return for all open positions
         Amm = getAmm(pair,self._provider)
-        if Amm == None:
-            return 
+
         if trader is None:
             trader = self._layer2wallet.address
 
-        clearingHouseViewerAddr = self.meta.getL2ContractAddress("ClearingHouseViewer")
-        with open("abi/ClearingHouseViewer.json") as f:
-            clearingHouseViewerAbi = json.load(f)
-        clearingHouseViewer = self._provider.l2.eth.contract(address=clearingHouseViewerAddr, abi=clearingHouseViewerAbi)
-
-        position = clearingHouseViewer.functions.getPersonalPositionWithFundingPayment(Amm.address,trader).call()        
+        position = self.clearingHouseViewer.functions.getPersonalPositionWithFundingPayment(Amm.address,trader).call()        
         return {
             'size': position[0][0],
             'margin': position[1][0],
@@ -232,17 +229,10 @@ class Trader:
     def getUnrealizedPnl(self, pair, pnlCalcOption, trader = None):
         #note: return for all open positions
         Amm = getAmm(pair,self._provider)
-        if Amm == None:
-            return 
         if trader is None:
             trader = self._layer2wallet.address
 
-        clearingHouseViewerAddr = self.meta.getL2ContractAddress("ClearingHouseViewer")
-        with open("abi/ClearingHouseViewer.json") as f:
-            clearingHouseViewerAbi = json.load(f)
-        clearingHouseViewer = self._provider.l2.eth.contract(address=clearingHouseViewerAddr, abi=clearingHouseViewerAbi)
-
-        return clearingHouseViewer.functions.getUnrealizedPnl(Amm.address,trader,pnlCalcOption.value).call()[0]
+        return self.clearingHouseViewer.functions.getUnrealizedPnl(Amm.address,trader,pnlCalcOption.value).call()[0]
 
     def getEntryPrice(self, pair):
 
@@ -252,5 +242,69 @@ class Trader:
 
         entryPrice = abs(openNotional/size)
         return entryPrice
+
+    def addMargin(self, pair, margin):
+
+        Amm = getAmm(pair,self._provider)
+
+        nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
+        gasEstimate = self.clearingHouse.functions.addMargin(Amm.address,{'d':parseUnits(margin,18)}).estimateGas()
+        tx = self.clearingHouse.functions.addMargin(Amm.address,{'d':parseUnits(margin,18)}).buildTransaction({
+            'nonce':nonce,
+            'gas': gasEstimate,
+            'gasPrice':self._provider.l2.eth.gasPrice
+        })
+        signed_tx = self._provider.l2.eth.account.sign_transaction(tx,private_key=self._layer2wallet.key)
+        txHash = self._provider.l2.eth.send_raw_transaction(signed_tx.rawTransaction)
+        receipt = self._provider.l2.eth.wait_for_transaction(txHash)
+        return receipt
+
+    def removeMargin(self, pair, margin):
+
+        Amm = getAmm(pair,self._provider)
+
+        nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
+        gasEstimate = self.clearingHouse.functions.removeMargin(Amm.address,{'d':parseUnits(margin,18)}).estimateGas()
+        tx = self.clearingHouse.functions.removeMargin(Amm.address,{'d':parseUnits(margin,18)}).buildTransaction({
+            'nonce':nonce,
+            'gas': gasEstimate,
+            'gasPrice':self._provider.l2.eth.gasPrice
+        })
+        signed_tx = self._provider.l2.eth.account.sign_transaction(tx,private_key=self._layer2wallet.key)
+        txHash = self._provider.l2.eth.send_raw_transaction(signed_tx.rawTransaction)
+        receipt = self._provider.l2.eth.wait_for_transaction(txHash)
+        return receipt
+
+    def settlePosition(self, pair):
+
+        Amm = getAmm(pair, self._provider)
+
+        nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
+        gasEstimate = self.clearingHouse.functions.removeMargin(Amm.address).estimateGas()
+        tx = self.clearingHouse.functions.removeMargin(Amm.address).buildTransaction({
+            'nonce':nonce,
+            'gas': gasEstimate,
+            'gasPrice':self._provider.l2.eth.gasPrice
+        })
+        signed_tx = self._provider.l2.eth.account.sign_transaction(tx,private_key=self._layer2wallet.key)
+        txHash = self._provider.l2.eth.send_raw_transaction(signed_tx.rawTransaction)
+        receipt = self._provider.l2.eth.wait_for_transaction(txHash)
+        return receipt
+
+    def liquidate(self, pair):
+
+        Amm = getAmm(pair, self._provider)
+        
+        nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
+        gasEstimate = self.clearingHouse.functions.removeMargin(Amm.address, self._layer2wallet.address).estimateGas()
+        tx = self.clearingHouse.functions.removeMargin(Amm.address, self._layer2wallet.address).buildTransaction({
+            'nonce':nonce,
+            'gas': gasEstimate,
+            'gasPrice':self._provider.l2.eth.gasPrice
+        })
+        signed_tx = self._provider.l2.eth.account.sign_transaction(tx,private_key=self._layer2wallet.key)
+        txHash = self._provider.l2.eth.send_raw_transaction(signed_tx.rawTransaction)
+        receipt = self._provider.l2.eth.wait_for_transaction(txHash)
+        return receipt
 
     

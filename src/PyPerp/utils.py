@@ -46,7 +46,7 @@ def getAmm(amm, provider):
 
     #todo: handle error
     if amm not in Amms:
-        return None
+        raise ValueError(f"Unknown pair: {pair}")
 
     meta = MetaData.MetaData(provider.testnet)
     AmmAddr = meta.getL2ContractAddress(amm)
