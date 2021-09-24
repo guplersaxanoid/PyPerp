@@ -1,6 +1,7 @@
 import json
 import MetaData
 import constants 
+import datetime 
 
 def confirmTransferToLayer2(receipt, provider):
     meta = MetaData(provider.testnet)
@@ -44,7 +45,6 @@ def getAmm(amm, provider):
     else:
         Amms = constants.AvailableAmms["mainnet"]
 
-    #todo: handle error
     if amm not in Amms:
         raise ValueError(f"Unknown pair: {pair}")
 
@@ -76,8 +76,21 @@ def estimateLiquidationPrice(position, amm, clearingHouse):
         liquidationPrice = entryPrice*(1+reverseLeverage-closePosPriceSlippage-maintanenceMarginRatio)
     return liquidationPrice
 
-def parseUnits(amount, decimal):
+def parseUnits(amount, decimal=constants.DEFAULT_DECIMALS):
     return amount*(10**decimal)
 
-def formatUnits(amount, decimal):
+def formatUnits(amount, decimal=constants.DEFAULT_DECIMALS):
     return amount/(10**decimal)
+
+def estimatedFundingRate(amm):
+    durationFromSharp = DateTime.local().minute * 60
+    twapPrice = amm.functions.getTwapPrice(durationFromSharp).call()
+    underlyingTwapPrice = amm.functions.getUnderlyingTwapPrice(durationFromSharp).call()
+    fundingPeriod = amm.functions.fundingPeriod().call()
+    
+    oneDayInSec = 60*60*24
+    marketTwapPrice = formatUnits(twapPrice[0])
+    indexTwapPrice = formatUnits(underlyingTwapPrice[0])
+    premium = marketTwapPrice - indexTwapPrice
+    premiumFraction = premium*fundingPeriod/oneDayInSec
+    return parseUnits(premiumFraction/indexTwapPrice)
