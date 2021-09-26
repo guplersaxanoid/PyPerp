@@ -20,7 +20,6 @@ setup(
     keywords = ['perp', 'perpetual protocol', 'defi'],   
     install_requires=[            
         'web3',
-        'json',
         'datetime'
     ],
     classifiers=[
