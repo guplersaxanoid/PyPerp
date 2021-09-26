@@ -1,9 +1,9 @@
-import constants
+import pyperp.constants
 import json
-from MetaData import MetaData
-from constants import Side
+from pyperp.MetaData import MetaData
+from pyperp.constants import Side
 from decimal import Decimal 
-from utils import *
+from pyperp.utils import *
 from eth_abi import encode_single
 
 class Trader:

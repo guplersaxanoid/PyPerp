@@ -1,6 +1,6 @@
 import json
-import MetaData
-from utils import estimatedFundingRate, formatUnits
+import pyperp.MetaData
+from pyperp.utils import estimatedFundingRate, formatUnits
 
 def getAmmInfo(provider,pair=None):
     with open("abi/InsuranceFund.json") as f:
