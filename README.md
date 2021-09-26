@@ -21,7 +21,7 @@ import web3
 from pyperp import Trader, Providers
 
 l2provider = Web3(Web3.HTTPProvider("https://rpc.xdaichain.com/"))
-l1provider = Web3(Web3.HTTPProvider("https://rinkeby.infura.io/v3/8649cd5402194cab8949b3eabe21d6ff"))
+l1provider = Web3(Web3.HTTPProvider("https://rinkeby.infura.io/v3/YOUR_INFURA_PROJECT_ID"))
 l1provider.middleware_onion.inject(geth_poa_middleware, layer=0) #rinkeby used poa
 provider = Providers.Providers(l1provider,l2provider,True) #The third argument specifies whether the providers are in testnet or mainnet. True means testnet, False means Mainnet
 
