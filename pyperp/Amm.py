@@ -1,5 +1,5 @@
 import json
-import pyperp.MetaData
+from pyperp import MetaData
 from pyperp.utils import estimatedFundingRate, formatUnits
 
 def getAmmInfo(provider,pair=None):

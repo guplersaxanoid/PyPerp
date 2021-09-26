@@ -1,6 +1,5 @@
 import json
-import pyperp.MetaData
-import pyperp.constants 
+from pyperp import MetaData, constants
 import datetime 
 
 def confirmTransferToLayer2(receipt, provider):

@@ -1,4 +1,4 @@
-import pyperp.constants
+from pyperp import constants
 import json
 from pyperp.MetaData import MetaData
 from pyperp.constants import Side
