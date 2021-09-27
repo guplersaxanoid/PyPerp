@@ -77,7 +77,7 @@ print(receipt)
 
 the openPosition() function takes the following parameters:
 1. The pair: the pair has to chosen from the available pairs in `AvailableAmms` dict in `constants.py` file
-2. side: Has to be either constants.Side.SHORT.value (0) or constants.Side.LONG.value (1) 
+2. side: Has to be either constants.Side.LONG.value (0) or constants.Side.SHORT.value (1) 
 3. quoteAssetAmount
 4. leverage
 5. baseAssetAmountLimit
