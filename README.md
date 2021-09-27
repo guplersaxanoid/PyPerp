@@ -17,7 +17,7 @@ This example code is written to demonstrate simple trading on the testnet.
 1.) creating a Trader object
 
 ```
-import web3
+from web3 import Web3
 from pyperp import Trader, Providers
 
 l2provider = Web3(Web3.HTTPProvider("https://rpc.xdaichain.com/"))
