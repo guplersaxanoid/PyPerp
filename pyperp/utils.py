@@ -1,6 +1,7 @@
 import json
 from pyperp import MetaData, constants
 import datetime 
+import pkgutil 
 
 def confirmTransferToLayer2(receipt, provider):
     meta = MetaData(provider.testnet)

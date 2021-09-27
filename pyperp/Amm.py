@@ -1,6 +1,7 @@
 import json
 from pyperp import MetaData
 from pyperp.utils import estimatedFundingRate, formatUnits
+import pkgutil
 
 def getAmmInfo(provider,pair=None):
     insuranceFundAbi = json.loads(pkgutil.get_data(__name__,"abi/InsuranceFund.json"))

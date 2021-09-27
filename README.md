@@ -69,7 +69,7 @@ print(receipt)
 Open a position with a pair of your choice using the openPosition() method in Trader class. Here, the ETH/USDC pair is used
 
 ```
-from perpy import constants
+from pyperp import constants
 
 receipt = trader.openPosition("ETHUSDC",constants.Side.SHORT.value,100,2,0)
 print(receipt)
