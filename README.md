@@ -22,12 +22,12 @@ from web3.middleware import geth_poa_middleware
 from pyperp import Trader, Providers
 
 l2provider = Web3(Web3.HTTPProvider("https://rpc.xdaichain.com/"))
-l1provider = Web3(Web3.HTTPProvider("https://rinkeby.infura.io/v3/8649cd5402194cab8949b3eabe21d6ff"))
+l1provider = Web3(Web3.HTTPProvider("https://rinkeby.infura.io/v3/YOUR_PROJECT_ID_HERE"))
 l1provider.middleware_onion.inject(geth_poa_middleware, layer=0) #rinkeby used poa
 provider = Providers(l1provider,l2provider,True) #The third argument specifies whether the providers are in testnet or mainnet. True means testnet, False means Mainnet
 
-l1wallet = provider.l1.eth.account.privateKeyToAccount("bfdad91bad521586103aea91601e95a8a87428b9a61db9d8cf31c7c3d45f3025")
-l2wallet = provider.l2.eth.account.privateKeyToAccount("bfdad91bad521586103aea91601e95a8a87428b9a61db9d8cf31c7c3d45f3025")
+l1wallet = provider.l1.eth.account.privateKeyToAccount("PRIVATE_KEY_HERE")
+l2wallet = provider.l2.eth.account.privateKeyToAccount("PRIVATE_KEY_HERE")
 
 trader = Trader(provider, l1wallet, l2wallet)
 ```
