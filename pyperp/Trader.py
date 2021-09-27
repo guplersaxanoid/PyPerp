@@ -251,7 +251,7 @@ class Trader:
 
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
         #gasEstimate = self.clearingHouse.functions.removeMargin(Amm.address).estimateGas()
-        tx = self.clearingHouse.functions.removeMargin(Amm.address).buildTransaction({
+        tx = self.clearingHouse.functions.settlePosition(Amm.address).buildTransaction({
             'nonce':nonce,
             'gas': 300000,
             'gasPrice':self._provider.l2.eth.gasPrice
@@ -267,7 +267,7 @@ class Trader:
         
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
         #gasEstimate = self.clearingHouse.functions.removeMargin(Amm.address, self._layer2wallet.address).estimateGas()
-        tx = self.clearingHouse.functions.removeMargin(Amm.address, self._layer2wallet.address).buildTransaction({
+        tx = self.clearingHouse.functions.liquidate(Amm.address, self._layer2wallet.address).buildTransaction({
             'nonce':nonce,
             'gas': 300000,
             'gasPrice':self._provider.l2.eth.gasPrice
