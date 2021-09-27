@@ -5,6 +5,7 @@ from pyperp.constants import Side
 from decimal import Decimal 
 from pyperp.utils import *
 from eth_abi import encode_single
+import pkgutil
 
 class Trader:
     def __init__(self,provider,l1wallet,l2wallet):
@@ -14,13 +15,11 @@ class Trader:
         self.meta = MetaData.MetaData(provider.testnet)
 
         clearingHouseAddr = self.meta.getL2ContractAddress("ClearingHouse")
-        with open("abi/ClearingHouse.json") as f:
-            clearingHouseAbi = json.load(f)
+        clearingHouseAbi =  json.loads(pkgutil.get_data(__name__,"abi/ClearingHouse.json"))
         self.clearingHouse = self._provider.l2.eth.contract(address=clearingHouseAddr, abi=clearingHouseAbi)
 
         clearingHouseViewerAddr = self.meta.getL2ContractAddress("ClearingHouseViewer")
-        with open("abi/ClearingHouseViewer.json") as f:
-            clearingHouseViewerAbi = json.load(f)
+        clearingHouseViewerAbi = json.loads(pkgutil.get_data(__name__,"abi/ClearingHouseViewer.json"))
         self.clearingHouseViewer = self._provider.l2.eth.contract(address=clearingHouseViewerAddr, abi=clearingHouseViewerAbi)
 
 
@@ -48,8 +47,7 @@ class Trader:
 
     def approveL1BridgetoUseUSDC(self):
         
-        with open("abi/TetherToken.json") as f:
-            TetherTokenAbi = json.load(f)
+        TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
         UsdcAddr = self.meta.getL1ExtContractAddress("usdc")
         layer1BridgeAddr = self.meta.getL1ContractAddress("RootBridge")
         layer1Usdc = self._provider.l1.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
@@ -66,10 +64,8 @@ class Trader:
         return receipt
 
     def depositUsdcToxDai(self, amount):
-        with open("abi/TetherToken.json") as f:
-            TetherTokenAbi = json.load(f)
-        with open("abi/RootBridge.json") as f:
-            RootBridgeAbi = json.load(f)
+        TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
+        RootBridgeAbi = json.loads(pkgutil.get_data(__name__,"abi/RootBridge.json"))
         UsdcAddr = self.meta.getL1ExtContractAddress("usdc")
         layer1BridgeAddr = self.meta.getL1ContractAddress("RootBridge")
         layer1Usdc = self._provider.l1.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
@@ -87,8 +83,7 @@ class Trader:
         return receipt
         
     def approveL2BridgeToUseUSDC(self):
-        with open("abi/TetherToken.json") as f:
-            TetherTokenAbi = json.load(f)
+        TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
         UsdcAddr = self.meta.getL2ExtContractAddress("usdc")
         layer2BridgeAddr = self.meta.getL2ContractAddress("ClientBridge")
         layer2Usdc = self._provider.l2.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
@@ -107,10 +102,8 @@ class Trader:
     
     def withdrawUsdcToEthereum(self, amount):
         
-        with open("abi/TetherToken.json") as f:
-            TetherTokenAbi = json.load(f)
-        with open("abi/ClientBridge.json") as f:
-            ClientBridgeAbi = json.load(f)
+        TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
+        ClientBridgeAbi = json.loads(pkgutil.get_data(__name__,"abi/ClientBridge.json"))
         UsdcAddr = self.meta.getL2ExtContractAddress("usdc")
         layer2BridgeAddr = self.meta.getL2ContractAddress("ClientBridge")
         layer2Usdc = self._provider.l2.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
@@ -129,8 +122,7 @@ class Trader:
 
     def approveClearingHouseToUseUSDC(self):
         
-        with open("abi/TetherToken.json") as f:
-            TetherTokenAbi = json.load(f)
+        TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
         UsdcAddr = self.meta.getL2ExtContractAddress("usdc")
         ClearingHouseAddr = self.meta.getL2ContractAddress("ClearingHouse")
         layer2Usdc = self._provider.l2.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)

@@ -3,12 +3,9 @@ from pyperp import MetaData
 from pyperp.utils import estimatedFundingRate, formatUnits
 
 def getAmmInfo(provider,pair=None):
-    with open("abi/InsuranceFund.json") as f:
-        insuranceFundAbi = json.load(f)
-    with open("abi/ClearingHouse.json") as f:
-        clearingHouseAbi = json.load(f)
-    with open("abi/Amm.json") as f:
-        ammAbi = json.load(f)
+    insuranceFundAbi = json.loads(pkgutil.get_data(__name__,"abi/InsuranceFund.json"))
+    clearingHouseAbi = json.loads(pkgutil.get_data(__name__,"abi/ClearingHouse.json"))
+    ammAbi = json.loads(pkgutil.get_data(__name__,"abi/Amm.json"))
 
     meta = MetaData.MetaData(provider.testnet)
     insuranceFundAddr = meta.getL2ContractAddress("InsuranceFund")

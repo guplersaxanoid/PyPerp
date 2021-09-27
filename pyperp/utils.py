@@ -4,8 +4,7 @@ import datetime
 
 def confirmTransferToLayer2(receipt, provider):
     meta = MetaData(provider.testnet)
-    with open("abi/AmbL2.json") as f:
-        layer2AmbAbi = json.load(f)
+    layer2AmbAbi = json.loads(pkgutil.get_data(__name__,"abi/AmbL2.json"))
     layer2AmbAddr = meta.getL2ExtContractAddress("ambBrideOnXDai")
     layer2Amb =  provider.l2.eth.contract(address=layer2AmbAddr,abi=layer2AmbAbi)
     methodId = "0x482515ce"
@@ -22,8 +21,7 @@ def confirmTransferToLayer2(receipt, provider):
 
 def confirmTransferToLayer1(reciept, provider):
     meta = MetaData(provider.testnet)
-    with open("abi/AmbL1.json") as f:
-        layer1AmbAbi = json.load(f)
+    layer1AmbAbi = json.loads(pkgutil.get_data(__name__,"abi/AmbL1.json"))
     lauer1AmbAddr = meta.getL1ExtContractAddress("ambBridgeOnEth")
     layer1Amb = provider.l1.eth.contract(address=layer1AmbAddr,abi=layer1AmbAbi)
     methodId = "0x520d2afd"
@@ -49,8 +47,7 @@ def getAmm(amm, provider):
 
     meta = MetaData.MetaData(provider.testnet)
     AmmAddr = meta.getL2ContractAddress(amm)
-    with open("abi/Amm.json") as f:
-        AmmAbi = json.load(f)
+    AmmAbi = json.loads(pkgutil.get_data(__name__,"abi/Amm.json"))
 
     Amm = provider.l2.eth.contract(address=AmmAddr, abi=AmmAbi)
     return Amm
