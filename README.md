@@ -18,6 +18,7 @@ This example code is written to demonstrate simple trading on the testnet.
 
 ```
 from web3 import Web3
+from web3.middleware import geth_poa_middleware
 from pyperp import Trader, Providers
 
 l2provider = Web3(Web3.HTTPProvider("https://rpc.xdaichain.com/"))
