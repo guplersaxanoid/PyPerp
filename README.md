@@ -8,7 +8,7 @@ From PyPi:
 
 `pip install pyperp`
 
-## Documentaion
+## Documentation
 
 The complete documentation can be found [here](https://velnaveen99.gitbook.io/pyperp/)
 
