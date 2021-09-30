@@ -7,21 +7,28 @@ from pyperp.utils import *
 from eth_abi import encode_single
 import pkgutil
 
+
 class Trader:
-    def __init__(self,provider,l1wallet,l2wallet):
+    """Contains the trader wallets and functions for trading on perp"""
+    def __init__(self, provider, l1wallet, l2wallet):
+        """
+        Arguments:
+        provider: Provider object
+        l1wallet: The layer 1 wallet of the trader
+        l2wallet: The layer 2 wallet of the trader
+        """
         self._layer1wallet = l1wallet
         self._layer2wallet = l2wallet
         self._provider = provider
         self.meta = MetaData.MetaData(provider.testnet)
 
         clearingHouseAddr = self.meta.getL2ContractAddress("ClearingHouse")
-        clearingHouseAbi =  json.loads(pkgutil.get_data(__name__,"abi/ClearingHouse.json"))
+        clearingHouseAbi = json.loads(pkgutil.get_data(__name__, "abi/ClearingHouse.json"))
         self.clearingHouse = self._provider.l2.eth.contract(address=clearingHouseAddr, abi=clearingHouseAbi)
 
         clearingHouseViewerAddr = self.meta.getL2ContractAddress("ClearingHouseViewer")
-        clearingHouseViewerAbi = json.loads(pkgutil.get_data(__name__,"abi/ClearingHouseViewer.json"))
+        clearingHouseViewerAbi = json.loads(pkgutil.get_data(__name__, "abi/ClearingHouseViewer.json"))
         self.clearingHouseViewer = self._provider.l2.eth.contract(address=clearingHouseViewerAddr, abi=clearingHouseViewerAbi)
-
 
     @property
     def layer1wallet(self):
@@ -40,14 +47,16 @@ class Trader:
         self._layer2wallet = w
 
     def l1WalletBalance(self):
+        """Return balance of layer 1 wallet""""
         return self._provider.l1.eth.getBalance(self._layer1wallet.address)
 
     def l2WalletBalance(self):
+        """Return balance of layer 2 wallet""""
         return self._provider.l2.eth.getBalance(self._layer2wallet.address)
 
     def approveL1BridgetoUseUSDC(self):
-        
-        TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
+        """Approve RootBridge to use USDC in layer 1 wallet"""
+        TetherTokenAbi = json.loads(pkgutil.get_data(__name__, "abi/TetherToken.json"))
         UsdcAddr = self.meta.getL1ExtContractAddress("usdc")
         layer1BridgeAddr = self.meta.getL1ContractAddress("RootBridge")
         layer1Usdc = self._provider.l1.eth.contract(address=UsdcAddr, abi=TetherTokenAbi)
@@ -64,6 +73,12 @@ class Trader:
         return receipt
 
     def depositUsdcToxDai(self, amount):
+        """
+        Move USDC from layer 1 to layer 2.
+        
+        Arguments:
+        amount -- amount to be transferred in USDC
+        """
         TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
         RootBridgeAbi = json.loads(pkgutil.get_data(__name__,"abi/RootBridge.json"))
         UsdcAddr = self.meta.getL1ExtContractAddress("usdc")
@@ -83,6 +98,7 @@ class Trader:
         return receipt
         
     def approveL2BridgeToUseUSDC(self):
+        """Approve ClientBridge to use USDC in trader's layer 2 wallet"""
         TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
         UsdcAddr = self.meta.getL2ExtContractAddress("usdc")
         layer2BridgeAddr = self.meta.getL2ContractAddress("ClientBridge")
@@ -101,7 +117,12 @@ class Trader:
         return receipt
     
     def withdrawUsdcToEthereum(self, amount):
+        """
+        Withdraw USDC from layer 2 to layer 1
         
+        Arguments:
+        amount -- amount in USDC to be withdrawn
+        """
         TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
         ClientBridgeAbi = json.loads(pkgutil.get_data(__name__,"abi/ClientBridge.json"))
         UsdcAddr = self.meta.getL2ExtContractAddress("usdc")
@@ -121,7 +142,7 @@ class Trader:
         return receipt
 
     def approveClearingHouseToUseUSDC(self):
-        
+        """Approve ClearingHouse to use USDC from trader layer 2 wallet"""
         TetherTokenAbi = json.loads(pkgutil.get_data(__name__,"abi/TetherToken.json"))
         UsdcAddr = self.meta.getL2ExtContractAddress("usdc")
         ClearingHouseAddr = self.meta.getL2ContractAddress("ClearingHouse")
@@ -139,7 +160,15 @@ class Trader:
         return receipt
     
     def openPosition(self, pair, side, quoteAssetAmount, leverage, baseAssetAmountLimit):
+        """Open a positions in the given pair.
         
+        Arguments:
+        pair -- A string value representing a pair. Choose from AvailableAmms in constants.py
+        side -- constants.Side.SHORT.value for short position or constants.Side.LONG.value for long position
+        quoteAssetAmount -- A non-zero quote asset amount value
+        leverage -- A leverage value between 0 and 10
+        baseAssetAmountLimit -- Base asset amount limit value
+        """
         if side!=0 and side!=1:
             raise ValueError("side must be either 0 or 1")
 
@@ -164,7 +193,13 @@ class Trader:
         return receipt
 
     def closePosition(self, pair, quoteAssetAmountLimit):
+        """
+        close a position in the given pair.
         
+        Arguments:
+        pair -- A string value representing a pair. Choose from AvailableAmms in constants.py
+        quoteAssetAmountLimit -- quote asset amount limit value
+        """
         Amm = getAmm(pair,self._provider)
         
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
@@ -180,7 +215,13 @@ class Trader:
         return receipt
 
     def getPersonalPositionWithFundingPayment(self, pair, trader=None):
-        #note: return for all open positions
+        """
+        return Position data.
+        
+        Arguments:
+        pair -- A string value representing a pair. Choose from AvailableAmms in constants.py
+        trader -- wallet address of the trader. If not provided, the layer 2 wallet address of the calling Trader object is used
+        """
         Amm = getAmm(pair,self._provider)
 
         if trader is None:
@@ -197,7 +238,14 @@ class Trader:
         }
 
     def getUnrealizedPnl(self, pair, pnlCalcOption, trader = None):
-        #note: return for all open positions
+        """
+        return unrealized pnl value for a position.
+        
+        Arguments:
+        pair -- A string value representing a pair. Choose from AvailableAmsms in constants.py
+        pnlCalcOption -- constants.PnlCalcOption.SPOT_PRICE or constants.PnlCalcOption.TWAP
+        trader -- wallet address of the trader. If not provider, the layer 2 wallet address of the calling Trader object
+        """
         Amm = getAmm(pair,self._provider)
         if trader is None:
             trader = self._layer2wallet.address
@@ -205,7 +253,12 @@ class Trader:
         return self.clearingHouseViewer.functions.getUnrealizedPnl(Amm.address,trader,pnlCalcOption.value).call()[0]
 
     def getEntryPrice(self, pair):
-
+        """
+        return the entry price for the given amm.
+        
+        Arguments:
+        pair -- A string value representing a pair. Choose from AvailableAmms in constants.py
+        """
         position = self.getPersonalPositionWithFundingPayment(pair)
         openNotional = formatUnits(position["openNotional"], constants.DEFAULT_DECIMALS)
         size  = formatUnits(position["size"], constants.DEFAULT_DECIMALS)
@@ -214,7 +267,13 @@ class Trader:
         return entryPrice
 
     def addMargin(self, pair, margin):
-
+        """
+        Add margin to an existing position.
+        
+        Arguments:
+        pair -- A string value representing a pair. Choose from AvailableAmms in constants.py
+        margin -- Margin amount to be added
+        """
         Amm = getAmm(pair,self._provider)
 
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
@@ -230,7 +289,13 @@ class Trader:
         return receipt
 
     def removeMargin(self, pair, margin):
-
+        """
+        Remove margin from an existing position.
+        
+        Arguments:
+        pair -- A string value representing a pair. Choose from AvailableAmms in constants.py
+        margin -- Margin amouunt to be removed 
+        """
         Amm = getAmm(pair,self._provider)
 
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
@@ -246,7 +311,12 @@ class Trader:
         return receipt
 
     def settlePosition(self, pair):
-
+        """
+        Settle all positions for an amm.
+        
+        Arguments:
+        pair -- A string value representing a pair. Choose from AvailableAmms in constants.py
+        """
         Amm = getAmm(pair, self._provider)
 
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
@@ -262,7 +332,12 @@ class Trader:
         return receipt
 
     def liquidate(self, pair):
-
+        """
+        Liquidate a position.
+        
+        Arguments:
+        pair -- A string value representing a pair. Choose from AvailableAmms in constants.py
+        """
         Amm = getAmm(pair, self._provider)
         
         nonce = self._provider.l2.eth.get_transaction_count(self._layer2wallet.address)
