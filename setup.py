@@ -9,7 +9,7 @@ with open('./README.md') as readme:
 setup(
     name = 'pyperp',        
     packages = ['pyperp'],  
-    version = '0.1.1',      
+    version = '0.1.2',      
     license='MIT',        
     description = 'python SDK for Perpetual Protocol',
     long_description_content_type='text/markdown',
@@ -19,8 +19,8 @@ setup(
     url = 'https://github.com/DeveloperInProgress/PyPerp',   
     keywords = ['perp', 'perpetual protocol', 'defi'],   
     install_requires=[            
-        'web3',
-        'datetime'
+        'web3>=5.24.0',
+        'datetime>=4.3'
     ],
 
     include_package_data = True,

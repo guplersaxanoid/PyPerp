@@ -138,7 +138,7 @@ def estimatedFundingRate(amm):
     Arguments:
     amm -- web3.eth.contract object representing amm
     """
-    durationFromSharp = DateTime.local().minute * 60
+    durationFromSharp = datetime.datetime.now().minute * 60
     twapPrice = amm.functions.getTwapPrice(durationFromSharp).call()
     underlyingTwapPrice = amm.functions.getUnderlyingTwapPrice(durationFromSharp).call()
     fundingPeriod = amm.functions.fundingPeriod().call()
