@@ -1,11 +1,10 @@
 """Contain the MetaData class."""
 
 import requests
-import json
 
 
 class MetaData:
-    """Fetch metadata json file from officially hosted URL and retieve contract addresses from it."""
+    """Work with the official metadata files."""
 
     def __init__(self, testnet: bool):
         """

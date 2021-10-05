@@ -12,14 +12,11 @@ def getUsdcL1(address):
     address -- The public address of the rinkeby wallet
     """
     faucetApiKey = "da2-h4xlnj33zvfnheevfgaw7datae"
-    appSyncId = "izc32tpa5ndllmbql57pcxluua"
-    faucet = f"https://{appSyncId}.appsync-api.ap-northeast-1.amazonaws.com/graphql"
-    headers = {
-        "Content-Type": "application/json",
-        "X-Api-Key": faucetApiKey
-    }
+    ID = "izc32tpa5ndllmbql57pcxluua"
+    faucet = f"https://{ID}.appsync-api.ap-northeast-1.amazonaws.com/graphql"
+    headers = {"Content-Type": "application/json", "X-Api-Key": faucetApiKey}
     body = {
-        'query': f'mutation issue {{issue(holderAddr: "{address}"){{\
+        "query": f'mutation issue {{issue(holderAddr: "{address}"){{\
                 txHashQuote\
                 amountQuote\
             }}\
