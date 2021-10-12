@@ -82,7 +82,7 @@ def getAmm(amm, provider):
     if amm not in Amms:
         raise ValueError(f"Unknown pair: {amm}")
 
-    meta = MetaData.MetaData(provider.testnet)
+    meta = MetaData(provider.testnet)
     AmmAddr = meta.getL2ContractAddress(amm)
     AmmAbi = json.loads(pkgutil.get_data(__name__, "abi/Amm.json"))
 
