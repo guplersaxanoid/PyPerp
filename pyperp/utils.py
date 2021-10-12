@@ -1,7 +1,8 @@
 """utility function to be used throughout the package."""
 
 import json
-from pyperp import MetaData, constants
+from pyperp.MetaData import MetaData
+from pyperp import constants
 import datetime
 import pkgutil
 
