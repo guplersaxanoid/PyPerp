@@ -20,7 +20,7 @@ class Trader:
         self._layer1wallet = l1wallet
         self._layer2wallet = l2wallet
         self._provider = provider
-        self.meta = MetaData.MetaData(provider.testnet)
+        self.meta = MetaData(provider.testnet)
 
         clearingHouseAddr = self.meta.getL2ContractAddress("ClearingHouse")
         clearingHouseAbi = json.loads(
