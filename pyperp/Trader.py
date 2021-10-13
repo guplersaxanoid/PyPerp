@@ -68,12 +68,12 @@ class Trader:
         """Return balance of layer 2 wallet."""
         return self._provider.l2.eth.getBalance(self._layer2wallet.address)
 
-    def approveL1BridgetoUseUSDC(self, gas):
+    def approveL1BridgetoUseUSDC(self, gasParams):
         """
         Approve RootBridge to use USDC in layer 1 wallet.
 
         Arguments:
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         TetherTokenAbi = json.loads(
             pkgutil.get_data(__name__, "abi/TetherToken.json")
@@ -91,8 +91,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l1.eth.gasPrice,
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"],
             }
         )
         signed_tx = self._provider.l1.eth.account.sign_transaction(
@@ -107,13 +107,13 @@ class Trader:
         )
         return receipt
 
-    def depositUsdcToxDai(self, amount, gas):
+    def depositUsdcToxDai(self, amount, gasParams):
         """
         Move USDC from layer 1 to layer 2.
 
         Arguments:
         amount -- amount to be transferred in USDC
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         RootBridgeAbi = json.loads(
             pkgutil.get_data(__name__, "abi/RootBridge.json")
@@ -133,8 +133,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l1.eth.gasPrice,
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"],
             }
         )
         signed_tx = self._provider.l1.eth.account.sign_transaction(
@@ -148,12 +148,12 @@ class Trader:
         )
         return receipt
 
-    def approveL2BridgeToUseUSDC(self, gas):
+    def approveL2BridgeToUseUSDC(self, gasParams):
         """
         Approve ClientBridge to use USDC in trader's layer 2 wallet.
 
         Arguments:
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         TetherTokenAbi = json.loads(
             pkgutil.get_data(__name__, "abi/TetherToken.json")
@@ -171,8 +171,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l2.eth.gasPrice,
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"],
             }
         )
         signed_tx = self._provider.l2.eth.account.sign_transaction(
@@ -187,13 +187,13 @@ class Trader:
         )
         return receipt
 
-    def withdrawUsdcToEthereum(self, amount, gas):
+    def withdrawUsdcToEthereum(self, amount, gasParams):
         """
         Withdraw USDC from layer 2 to layer 1.
 
         Arguments:
         amount -- amount in USDC to be withdrawn
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         TetherTokenAbi = json.loads(
             pkgutil.get_data(__name__, "abi/TetherToken.json")
@@ -219,8 +219,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l2.eth.gasPrice
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"]
             }
         )
         signed_tx = self._provider.l2.eth.account.sign_transaction(
@@ -234,12 +234,12 @@ class Trader:
         )
         return receipt
 
-    def approveClearingHouseToUseUSDC(self, gas):
+    def approveClearingHouseToUseUSDC(self, gasParams):
         """
         Approve ClearingHouse to use USDC from trader layer 2 wallet.
 
         Arguments:
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         TetherTokenAbi = json.loads(
             pkgutil.get_data(__name__, "abi/TetherToken.json")
@@ -257,8 +257,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l2.eth.gasPrice
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"]
             }
         )
         signed_tx = self._provider.l2.eth.account.sign_transaction(
@@ -272,7 +272,7 @@ class Trader:
 
     def openPosition(
         self, pair, side, quoteAssetAmount,
-        leverage, baseAssetAmountLimit, gas
+        leverage, baseAssetAmountLimit, gasParams
     ):
         """Open a positions in the given pair.
 
@@ -282,7 +282,7 @@ class Trader:
         quoteAssetAmount -- A non-zero quote asset amount value
         leverage -- A leverage value between 0 and 10
         baseAssetAmountLimit -- Base asset amount limit value
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         if side != 0 and side != 1:
             raise ValueError("side must be either 0 or 1")
@@ -307,8 +307,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l2.eth.gasPrice
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"]
             }
         )
         signed_tx = self._provider.l2.eth.account.sign_transaction(
@@ -320,14 +320,14 @@ class Trader:
         receipt = self._provider.l2.eth.wait_for_transaction_receipt(txHash)
         return receipt
 
-    def closePosition(self, pair, quoteAssetAmountLimit, gas):
+    def closePosition(self, pair, quoteAssetAmountLimit, gasParams):
         """
         Close a position in the given pair.
 
         Arguments:
         pair -- A string value representing a pair.
         quoteAssetAmountLimit -- quote asset amount limit value
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         Amm = utils.getAmm(pair, self._provider)
 
@@ -340,8 +340,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l2.eth.gasPrice
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"]
             }
         )
         signed_tx = self._provider.l2.eth.account.sign_transaction(
@@ -413,14 +413,14 @@ class Trader:
         entryPrice = abs(openNotional / size)
         return entryPrice
 
-    def addMargin(self, pair, margin, gas):
+    def addMargin(self, pair, margin, gasParams):
         """
         Add margin to an existing position.
 
         Arguments:
         pair -- A string value representing a pair.
         margin -- Margin amount to be added
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         Amm = utils.getAmm(pair, self._provider)
 
@@ -432,8 +432,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l2.eth.gasPrice
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"]
             }
         )
         signed_tx = self._provider.l2.eth.account.sign_transaction(
@@ -447,14 +447,14 @@ class Trader:
         )
         return receipt
 
-    def removeMargin(self, pair, margin, gas):
+    def removeMargin(self, pair, margin, gasParams):
         """
         Remove margin from an existing position.
 
         Arguments:
         pair -- A string value representing a pair.
         margin -- Margin amouunt to be removed
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         Amm = utils.getAmm(pair, self._provider)
 
@@ -466,8 +466,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l2.eth.gasPrice
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"]
             }
         )
         signed_tx = self._provider.l2.eth.account.sign_transaction(
@@ -481,13 +481,13 @@ class Trader:
         )
         return receipt
 
-    def settlePosition(self, pair, gas):
+    def settlePosition(self, pair, gasParams):
         """
         Settle all positions for an amm.
 
         Arguments:
         pair -- A string value representing a pair.
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         Amm = utils.getAmm(pair, self._provider)
 
@@ -499,8 +499,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l2.eth.gasPrice
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"]
             }
         )
         signed_tx = self._provider.l2.eth.account.sign_transaction(
@@ -514,13 +514,13 @@ class Trader:
         )
         return receipt
 
-    def liquidate(self, pair, gas):
+    def liquidate(self, pair, gasParams):
         """
         Liquidate a position.
 
         Arguments:
         pair -- A string value representing a pair.
-        gas -- gas in GWEI
+        gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         Amm = utils.getAmm(pair, self._provider)
 
@@ -532,8 +532,8 @@ class Trader:
         ).buildTransaction(
             {
                 "nonce": nonce,
-                "gas": gas,
-                "gasPrice": self._provider.l2.eth.gasPrice
+                "gas": gasParams["GasLimit"],
+                "gasPrice": gasParams["GasPrice"]
             }
         )
         signed_tx = self._provider.l2.eth.account.sign_transaction(
