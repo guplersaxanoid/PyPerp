@@ -50,13 +50,13 @@ This USDC faucet is hosted by the Perpetual Protocol team, and it can be used on
 allow layer1 bridge to use your USDC funds if not done already
 
 ```
-receipt = trader.approveL1BridgetoUseUSDC(<gas_amount>)
+receipt = trader.approveL1BridgetoUseUSDC({"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
 Then, call `depositUsdcToXdai()`
 ```
-receipt = trader.depositUsdcToxDai(100,<gas_amount>) #move 100 USDC to xDai 
+receipt = trader.depositUsdcToxDai(100,{"GasPrice":<gas price>, "GasLimit":<gas limit>}) #move 100 USDC to xDai 
 ```
 
 4.) open a position 
@@ -64,7 +64,7 @@ receipt = trader.depositUsdcToxDai(100,<gas_amount>) #move 100 USDC to xDai
 allow ClearingHouse contract to use the USDC in your xDai if not done already. 
 
 ```
-receipt = trader.approveClearingHouseToUseUSDC(<gas_amount>)
+receipt = trader.approveClearingHouseToUseUSDC({"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
@@ -73,7 +73,7 @@ Open a position with a pair of your choice using the openPosition() method in Tr
 ```
 from pyperp import constants
 
-receipt = trader.openPosition("ETHUSDC",constants.Side.SHORT.value,100,2,0,<gas_amount>)
+receipt = trader.openPosition("ETHUSDC",constants.Side.SHORT.value,100,2,0,{"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
@@ -97,21 +97,21 @@ The second parameter of the getUnrealizedPnl function is the PnlCalcOption which
 6.) add margin to position:
 
 ```
-receipt = trader.addMargin("ETHUSDC", 10, <gas_amount>)
+receipt = trader.addMargin("ETHUSDC", 10, {"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
 7.) remove margin:
 
 ```
-receipt = trader.removeMargin("ETHUSDC", 10, <gas_amount>)
+receipt = trader.removeMargin("ETHUSDC", 10, {"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
 8.) close a position:
 
 ```
-receipt = trader.closePosition("ETHUSDC",0, <gas_amount>) #the second parameter is quote asset amount limit
+receipt = trader.closePosition("ETHUSDC",0, {"GasPrice":<gas price>, "GasLimit":<gas limit>}) #the second parameter is quote asset amount limit
 print(receipt)
 ```
 
@@ -120,14 +120,14 @@ print(receipt)
 allow Layer 2 Bridge to use the USDC if not done already
 
 ```
-reciept = trader.approveL2BridgeToUseUSDC(<gas_amount>)
+reciept = trader.approveL2BridgeToUseUSDC({"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
 then, withdraw USDC to L1 using `withdrawUsdcToEthereum()` function in `Trader` class
 
 ```
-receipt = trader.withdrawUsdcToEthereum(100,<gas_amount>)
+receipt = trader.withdrawUsdcToEthereum(100,{"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
