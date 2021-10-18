@@ -68,6 +68,30 @@ class Trader:
         """Return balance of layer 2 wallet."""
         return self._provider.l2.eth.getBalance(self._layer2wallet.address)
 
+    def l1UsdcBalance(self):
+        """Return USDC token balance of layer 1 wallet"""
+        TetherTokenAbi = json.loads(
+            pkgutil.get_data(__name__, "abi/TetherToken.json")
+        )
+        UsdcAddr = self.meta.getL1ExtContractAddress("usdc")
+        layer1Usdc = self._provider.l1.eth.contract(
+            address=UsdcAddr, abi=TetherTokenAbi
+        )
+        return layer1Usdc.functions.balanceOf(
+            self._layer1wallet.address).call()
+
+    def l2UsdcBalance(self):
+        """Return USDC token balance of layer 2 wallet"""
+        TetherTokenAbi = json.loads(
+            pkgutil.get_data(__name__, "abi/TetherToken.json")
+        )
+        UsdcAddr = self.meta.getL2ExtContractAddress("usdc")
+        layer2Usdc = self._provider.l2.eth.contract(
+            address=UsdcAddr, abi=TetherTokenAbi
+        )
+        return layer2Usdc.functions.balanceOf(
+            self._layer2wallet.address).call()
+
     def approveL1BridgetoUseUSDC(self, gasParams):
         """
         Approve RootBridge to use USDC in layer 1 wallet.
