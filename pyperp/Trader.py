@@ -296,7 +296,7 @@ class Trader:
 
     def openPosition(
         self, pair, side, quoteAssetAmount,
-        leverage, baseAssetAmountLimit, gasParams
+        leverage, slippageTolerance, gasParams
     ):
         """Open a positions in the given pair.
 
@@ -305,7 +305,7 @@ class Trader:
         side -- 1 for short position or 0 for long position
         quoteAssetAmount -- A non-zero quote asset amount value
         leverage -- A leverage value between 0 and 10
-        baseAssetAmountLimit -- Base asset amount limit value
+        slippageTolerance -- slippage tolerance in % (1-100)
         gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         if side != 0 and side != 1:
@@ -319,6 +319,19 @@ class Trader:
 
         Amm = utils.getAmm(pair, self._provider)
 
+        if side == 1:
+            dirOfQuote = constants.Dir.REMOVE_FROM_AMM
+        else:
+            dirOfQuote = constants.Dir.ADD_TO_AMM
+
+        baseAssetAmountLimit = utils.getBaseAssetAmountLimit(
+            self._provider.l2,
+            pair,
+            utils.parseUnits(quoteAssetAmount),
+            slippageTolerance,
+            dirOfQuote
+        )
+
         nonce = self._provider.l2.eth.get_transaction_count(
             self._layer2wallet.address
         )
@@ -327,7 +340,7 @@ class Trader:
             side,
             {"d": utils.parseUnits(quoteAssetAmount, 18)},
             {"d": utils.parseUnits(leverage, 18)},
-            {"d": utils.parseUnits(baseAssetAmountLimit, 18)},
+            {"d": baseAssetAmountLimit},
         ).buildTransaction(
             {
                 "nonce": nonce,
@@ -344,13 +357,13 @@ class Trader:
         receipt = self._provider.l2.eth.wait_for_transaction_receipt(txHash)
         return receipt
 
-    def closePosition(self, pair, quoteAssetAmountLimit, gasParams):
+    def closePosition(self, pair, slippageTolerance, gasParams):
         """
         Close a position in the given pair.
 
         Arguments:
         pair -- A string value representing a pair.
-        quoteAssetAmountLimit -- quote asset amount limit value
+        slippageTolerance -- slippageTolerance in % (1-100)
         gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         Amm = utils.getAmm(pair, self._provider)
@@ -358,6 +371,21 @@ class Trader:
         nonce = self._provider.l2.eth.get_transaction_count(
             self._layer2wallet.address
         )
+
+        size = self.getPersonalPositionWithFundingPayment(pair)["size"]
+        if size <= 0 :
+            dirOfQuote = constants.Dir.ADD_TO_AMM
+        else:
+            dirOfQuote = constants.Dir.REMOVE_FROM_AMM
+
+        quoteAssetAmountLimit = utils.getQuoteAssetAmountLimit(
+            provider,
+            pair,
+            abs(size),
+            slippageTolerance,
+            dirOfQuote
+        )
+
         tx = self.clearingHouse.functions.closePosition(
             Amm.address,
             {"d": utils.parseUnits(quoteAssetAmountLimit)},
