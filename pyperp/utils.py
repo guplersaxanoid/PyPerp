@@ -1,6 +1,7 @@
 """utility function to be used throughout the package."""
 
 import json
+from pyperp import Providers, Amm
 from pyperp.MetaData import MetaData
 from pyperp import constants
 import datetime
@@ -174,3 +175,31 @@ def estimatedFundingRate(amm):
     premium = marketTwapPrice - indexTwapPrice
     premiumFraction = premium * fundingPeriod / oneDayInSec
     return parseUnits(premiumFraction / indexTwapPrice)
+
+def getBaseAssetAmountLimit(
+    provider: Providers,
+    pair: str,
+    quoteAssetAmount: float,
+    slippageTolerance: float
+    dirOfQuote: constants.Dir
+):
+
+    baseAssetAmount = getInputPrice(
+        provider, pair, dirOfQuote.value, quoteAssetAmount
+    )
+    baseAssetAmountLimit = baseAssetAmount * (1-slippageTolerance/100)
+    return baseAssetAmountLimit
+
+def getQuoteAssetAmountLimit(
+    provider: Providers,
+    pair: str,
+    baseAssetAmount: float,
+    slippageTolerance: float,
+    dirOfQuote: constants.Dir
+):
+
+    quoteAssetAmount = getOutputPrice(
+        provider, pair, dirOfQuote.value, baseAssetAmount
+    )
+    quoteAssetAmountLimit = quoteAssetAmount * (1-slippageTolerance/100)
+    return quoteAssetAmountLimit
