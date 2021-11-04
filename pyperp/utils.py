@@ -141,7 +141,7 @@ def parseUnits(amount, decimal=constants.DEFAULT_DECIMALS):
     amount -- the value to be parsed
     decimal -- number of decimal units to parse the value to.
     """
-    return amount * (10 ** decimal)
+    return int(amount * (10 ** decimal))
 
 
 def formatUnits(amount, decimal=constants.DEFAULT_DECIMALS):
