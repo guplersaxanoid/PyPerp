@@ -1,10 +1,10 @@
 """Contains amm related methods and data."""
 
 import json
-from pyperp import MetaData
-from pyperp.utils import estimatedFundingRate, formatUnits
+from pyperp import MetaData, Providers
+from pyperp.utils import estimatedFundingRate, formatUnits, parseUnits
 import pkgutil
-
+from pyperp.constants import Dir
 
 def getAmmInfo(provider, pair=None):
     """
@@ -91,3 +91,117 @@ def getAmmInfo(provider, pair=None):
         )
 
     return data
+
+def getInputTwapAmount(
+    provider: Providers,
+    pair: str,
+    dirOfQuote: Dir,
+    quoteAssetAmount: float
+):
+    amm = getAmm(pair, provider)
+    inputTwap = amm.functions.getInputTwap(
+        dirOfQuote.value, 
+        {d: parseUnits(quoteAssetAmount)}
+        ).call()
+    return inputTwap[0]
+
+def getOutputTwapAmount(
+    provider: Providers,
+    pair: str,
+    dirOfQuote: Dir,
+    baseAssetAmount: float
+):
+    amm = getAmm(pair, provider)
+    outputTwap = amm.functions.getOutputTwap(
+        dirOfQuote.value,
+        {d: parseUnits(baseAssetAmount)}
+    ).call()
+    return outputTwap[0]
+
+def getInputPrice(
+    provider: Providers,
+    pair: str,
+    dirOfQuote: Dir,
+    quoteAssetAmount: float
+):
+    amm = getAmm(pair,provider)
+    inputPrice = amm.functions.getInputPrice(
+        dirOfQuote.value,
+        {d: parseUnits(quoteAssetAmount)}
+    ).call()
+    return inputPrice[0]
+
+def getOutputPrice(
+    provider: Providers,
+    pair: str,
+    dirOfQuote: Dir,
+    baseAssetAmount: float
+):
+    amm = getAmm(pair, provider)
+    outputPrice = amm.functions.getOutputPrice(
+        dirOfQuote.value,
+        {d: parseUnits(baseAssetAmount)}
+    ).call()
+    return outputPrice[0]
+
+def getUnderlyingPrice(
+    provider: Providers,
+    pair: str
+):
+    amm = getAmm(pair, provider)
+    underlyingPrice = amm.functions.getUnderlyingPrice().call()
+    return underlyingPrice[0]
+
+def getUnderlyingTwapPrice(
+    provider: Providers,
+    pair: str,
+    intervalInSeconds: int
+):
+    underlyingTwapPrice = amm.functions.getUnderlyingTwapPrice(
+        intervalInSeconds
+    ).call()
+    return underlyingTwapPrice[0]
+
+def getSpotPrice(
+    provider: Providers,
+    pair: str
+):
+    amm = getAmm(pair, provider)
+    spotPrice = amm.functions.getSpotPrice().call()
+    return spotPrice[0]
+    
+def getTwapPrice(
+    provider: Providers,
+    pair: str,
+    intervalInSeconds: int
+):
+    amm = getAmm(pair, provider)
+    twapPrice = amm.functions.getTwapPrice(
+        intervalInSeconds
+    ).call()
+    return twapPrice[0]
+
+def getQuoteAndBaseAssetReserve(
+    provider: Providers,
+    pair: str,
+):
+    amm = getAmm(pair, provider)
+    reserve = amm.functions.getReserve().call()
+    return {
+        "quoteAssetReserve": reserve[0][0],
+        "baseAssetReserve": reserve[1][0]
+    }
+
+def calculateTollAndSpreadFee(
+    provider: Providers,
+    pair: str,
+    quoteAssetAmount: float
+):
+    amm = getAmm(pair, provider)
+    fee = amm.functions.calcFee(
+        {d: parseUnits(quoteAssetAmount)}
+    ).call()
+    return {
+        "tollRatio": fee[0][0],
+        "spreadRatio": fee[1][0]
+    }
