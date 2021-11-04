@@ -33,3 +33,7 @@ class PnlCalcOption(Enum):
     SPOT_PRICE = 0
     TWAP = 1
     ORACLE = 2
+
+class Dir: 
+    ADD_TO_AMM = 0
+    REMOVE_FROM_AMM = 1
