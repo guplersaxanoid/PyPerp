@@ -296,7 +296,7 @@ class Trader:
 
     def openPosition(
         self, pair, side, quoteAssetAmount,
-        leverage, slippageTolerance, gasParams
+        leverage, baseAssetAmountLimit, gasParams
     ):
         """Open a positions in the given pair.
 
@@ -305,7 +305,7 @@ class Trader:
         side -- 1 for short position or 0 for long position
         quoteAssetAmount -- A non-zero quote asset amount value
         leverage -- A leverage value between 0 and 10
-        slippageTolerance -- slippage tolerance in % (1-100)
+        baseAssetAmountLimit -- base asset amount limit after slippage
         gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         if side != 0 and side != 1:
@@ -318,19 +318,6 @@ class Trader:
             raise ValueError("leverage must be in the range (0,10]")
 
         Amm = utils.getAmm(pair, self._provider)
-
-        if side == 1:
-            dirOfQuote = constants.Dir.REMOVE_FROM_AMM
-        else:
-            dirOfQuote = constants.Dir.ADD_TO_AMM
-
-        baseAssetAmountLimit = utils.getBaseAssetAmountLimit(
-            self._provider.l2,
-            pair,
-            utils.parseUnits(quoteAssetAmount),
-            slippageTolerance,
-            dirOfQuote
-        )
 
         nonce = self._provider.l2.eth.get_transaction_count(
             self._layer2wallet.address
@@ -357,13 +344,13 @@ class Trader:
         receipt = self._provider.l2.eth.wait_for_transaction_receipt(txHash)
         return receipt
 
-    def closePosition(self, pair, slippageTolerance, gasParams):
+    def closePosition(self, pair, quoteAssetAmountLimit, gasParams):
         """
         Close a position in the given pair.
 
         Arguments:
         pair -- A string value representing a pair.
-        slippageTolerance -- slippageTolerance in % (1-100)
+        quoteAssetAmountLimit -- quote asset amount limit after slippage
         gasParams -- a dict with GasPrice & GasLimit (GWEI)
         """
         Amm = utils.getAmm(pair, self._provider)
@@ -372,19 +359,6 @@ class Trader:
             self._layer2wallet.address
         )
 
-        size = self.getPersonalPositionWithFundingPayment(pair)["size"]
-        if size <= 0 :
-            dirOfQuote = constants.Dir.ADD_TO_AMM
-        else:
-            dirOfQuote = constants.Dir.REMOVE_FROM_AMM
-
-        quoteAssetAmountLimit = utils.getQuoteAssetAmountLimit(
-            provider,
-            pair,
-            abs(size),
-            slippageTolerance,
-            dirOfQuote
-        )
 
         tx = self.clearingHouse.functions.closePosition(
             Amm.address,

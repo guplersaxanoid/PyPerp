@@ -1,8 +1,7 @@
 """Contains amm related methods and data."""
 
 import json
-from pyperp import MetaData, Providers
-from pyperp.utils import estimatedFundingRate, formatUnits, parseUnits
+from pyperp import MetaData, Providers, utils
 import pkgutil
 from pyperp.constants import Dir
 
@@ -57,7 +56,7 @@ def getAmmInfo(provider, pair=None):
         quoteAssetReserve = reserve[0]
         baseAssetReserve = reserve[1]
         priceFeed = amm.functions.priceFeed().call()
-        estFundingRate = (estimatedFundingRate(amm) / 1e18) * 100
+        estFundingRate = (utils.estimatedFundingRate(amm) / 1e18) * 100
 
         if priceFeed == meta.getL2ContractAddress("L2PriceFeed"):
             priceFeedName = "L2PriceFeed"
@@ -73,17 +72,17 @@ def getAmmInfo(provider, pair=None):
             {
                 "pair": f"{priceFeedKey}/USDC",
                 "Proxy Address": addr,
-                "Index Price": f"{formatUnits(indexPrice[0])} USDC",
-                "Market Price": f"{formatUnits(marketPrice[0])} USDC",
-                "OpenInterestNotionalCap": f"{formatUnits(openInterestNotionalCap[0])}\
+                "Index Price": f"{utils.formatUnits(indexPrice[0])} USDC",
+                "Market Price": f"{utils.formatUnits(marketPrice[0])} USDC",
+                "OpenInterestNotionalCap": f"{utils.formatUnits(openInterestNotionalCap[0])}\
                  USDC",
-                "OpenInterestNotional": f"{formatUnits(openInterestNotional)}\
+                "OpenInterestNotional": f"{utils.formatUnits(openInterestNotional)}\
                  USDC",
-                "MaxHoldingBaseAsset": f"{formatUnits(maxHoldingBaseAsset[0])}\
+                "MaxHoldingBaseAsset": f"{utils.formatUnits(maxHoldingBaseAsset[0])}\
                  USDC",
-                "QuoteAssetReserve": f"{formatUnits(quoteAssetReserve[0])}\
+                "QuoteAssetReserve": f"{utils.formatUnits(quoteAssetReserve[0])}\
                  USDC",
-                "BaseAssetReserve": f"{formatUnits(baseAssetReserve[0])}\
+                "BaseAssetReserve": f"{utils.formatUnits(baseAssetReserve[0])}\
                 {priceFeedKey}USDC",
                 "PriceFeed": priceFeedName,
                 "est.funding rate": f"{estFundingRate} %",
@@ -98,10 +97,10 @@ def getInputTwapAmount(
     dirOfQuote: Dir,
     quoteAssetAmount: float
 ):
-    amm = getAmm(pair, provider)
+    amm = utils.getAmm(pair, provider)
     inputTwap = amm.functions.getInputTwap(
         dirOfQuote.value, 
-        {d: parseUnits(quoteAssetAmount)}
+        {'d': utils.parseUnits(quoteAssetAmount)}
         ).call()
     return inputTwap[0]
 
@@ -111,10 +110,10 @@ def getOutputTwapAmount(
     dirOfQuote: Dir,
     baseAssetAmount: float
 ):
-    amm = getAmm(pair, provider)
+    amm = utils.getAmm(pair, provider)
     outputTwap = amm.functions.getOutputTwap(
         dirOfQuote.value,
-        {d: parseUnits(baseAssetAmount)}
+        {'d': utils.parseUnits(baseAssetAmount)}
     ).call()
     return outputTwap[0]
 
@@ -124,10 +123,10 @@ def getInputPrice(
     dirOfQuote: Dir,
     quoteAssetAmount: float
 ):
-    amm = getAmm(pair,provider)
+    amm = utils.getAmm(pair,provider)
     inputPrice = amm.functions.getInputPrice(
         dirOfQuote.value,
-        {d: parseUnits(quoteAssetAmount)}
+        {'d': utils.parseUnits(quoteAssetAmount)}
     ).call()
     return inputPrice[0]
 
@@ -137,10 +136,10 @@ def getOutputPrice(
     dirOfQuote: Dir,
     baseAssetAmount: float
 ):
-    amm = getAmm(pair, provider)
+    amm = utils.getAmm(pair, provider)
     outputPrice = amm.functions.getOutputPrice(
         dirOfQuote.value,
-        {d: parseUnits(baseAssetAmount)}
+        {'d': utils.parseUnits(baseAssetAmount)}
     ).call()
     return outputPrice[0]
 
@@ -148,7 +147,7 @@ def getUnderlyingPrice(
     provider: Providers,
     pair: str
 ):
-    amm = getAmm(pair, provider)
+    amm = utils.getAmm(pair, provider)
     underlyingPrice = amm.functions.getUnderlyingPrice().call()
     return underlyingPrice[0]
 
@@ -157,6 +156,7 @@ def getUnderlyingTwapPrice(
     pair: str,
     intervalInSeconds: int
 ):
+    amm = utils.getAmm(pair, provider)
     underlyingTwapPrice = amm.functions.getUnderlyingTwapPrice(
         intervalInSeconds
     ).call()
@@ -166,16 +166,16 @@ def getSpotPrice(
     provider: Providers,
     pair: str
 ):
-    amm = getAmm(pair, provider)
-    spotPrice = amm.functions.getSpotPrice().call()
-    return spotPrice[0]
+    amm = utils.getAmm(pair, provider)
+    reserve = getQuoteAndBaseAssetReserve(provider, pair)
+    return reserve["quoteAssetReserve"]/reserve["baseAssetReserve"]
     
 def getTwapPrice(
     provider: Providers,
     pair: str,
     intervalInSeconds: int
 ):
-    amm = getAmm(pair, provider)
+    amm = utils.getAmm(pair, provider)
     twapPrice = amm.functions.getTwapPrice(
         intervalInSeconds
     ).call()
@@ -185,7 +185,7 @@ def getQuoteAndBaseAssetReserve(
     provider: Providers,
     pair: str,
 ):
-    amm = getAmm(pair, provider)
+    amm = utils.getAmm(pair, provider)
     reserve = amm.functions.getReserve().call()
     return {
         "quoteAssetReserve": reserve[0][0],
@@ -197,11 +197,20 @@ def calculateTollAndSpreadFee(
     pair: str,
     quoteAssetAmount: float
 ):
-    amm = getAmm(pair, provider)
+    amm = utils.getAmm(pair, provider)
     fee = amm.functions.calcFee(
-        {d: parseUnits(quoteAssetAmount)}
+        {'d': utils.parseUnits(quoteAssetAmount)}
     ).call()
     return {
         "tollRatio": fee[0][0],
         "spreadRatio": fee[1][0]
     }
+
+def getPriceImpact(
+    provider: Providers,
+    pair: str,
+    entryPrice: float
+):
+    spotPrice = getSpotPrice(provider, pair)
+    priceImpact = (entryPrice-spotPrice)*100/spotPrice
+    return priceImpact

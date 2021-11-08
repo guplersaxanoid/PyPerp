@@ -34,6 +34,6 @@ class PnlCalcOption(Enum):
     TWAP = 1
     ORACLE = 2
 
-class Dir: 
+class Dir(Enum): 
     ADD_TO_AMM = 0
     REMOVE_FROM_AMM = 1

@@ -180,12 +180,12 @@ def getBaseAssetAmountLimit(
     provider: Providers,
     pair: str,
     quoteAssetAmount: float,
-    slippageTolerance: float
+    slippageTolerance: float,
     dirOfQuote: constants.Dir
 ):
 
-    baseAssetAmount = getInputPrice(
-        provider, pair, dirOfQuote.value, quoteAssetAmount
+    baseAssetAmount = Amm.getInputPrice(
+        provider, pair, dirOfQuote, quoteAssetAmount
     )
     baseAssetAmountLimit = baseAssetAmount * (1-slippageTolerance/100)
     return baseAssetAmountLimit
@@ -198,8 +198,21 @@ def getQuoteAssetAmountLimit(
     dirOfQuote: constants.Dir
 ):
 
-    quoteAssetAmount = getOutputPrice(
-        provider, pair, dirOfQuote.value, baseAssetAmount
+    quoteAssetAmount = Amm.getOutputPrice(
+        provider, pair, dirOfQuote, baseAssetAmount
     )
     quoteAssetAmountLimit = quoteAssetAmount * (1-slippageTolerance/100)
     return quoteAssetAmountLimit
+
+def calcEntryPrice(
+    provider: Providers,
+    pair: str,
+    collateral: float,
+    leverage: float,
+    dirOfQuote: constants.Dir
+):
+
+    positionSize = Amm.getInputPrice(
+        provider, pair, dirOfQuote, collateral
+    )
+    return collateral*leverage/formatUnits(positionSize)
