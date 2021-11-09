@@ -15,24 +15,24 @@ class MetaData:
             self._store = "https://metadata.perp.exchange/staging.json"
         else:
             self._store = "https://metadata.perp.exchange/production.json"
-        self.fetchMeta()
+        self.fetch_meta()
 
     @property
-    def metadataStore(self):
+    def metadata_store(self):
         """Getter for metadata URL."""
         return self._store
 
     @metadataStore.setter
-    def metadataStore(self, s):
+    def metadata_store(self, s):
         """Get metadata URL."""
         self._store = s
-        self.fetchMeta()
+        self.fetch_meta()
 
-    def fetchMeta(self):
+    def fetch_meta(self):
         """Download metadata json file."""
         self.meta = requests.get(self._store).json()
 
-    def getL1ContractAddress(self, name):
+    def get_l1_contract_address(self, name):
         """
         Retrieve Layer 1 contract address.
 
@@ -41,7 +41,7 @@ class MetaData:
         """
         return self.meta["layers"]["layer1"]["contracts"][name]["address"]
 
-    def getL2ContractAddress(self, name):
+    def get_l2_contract_address(self, name):
         """
         Retrieve Layer 2 contract address.
 
@@ -50,7 +50,7 @@ class MetaData:
         """
         return self.meta["layers"]["layer2"]["contracts"][name]["address"]
 
-    def getL1ExtContractAddress(self, name):
+    def get_l1_ext_contract_address(self, name):
         """
         Retrieve Layer 1 external contract address.
 
@@ -59,7 +59,7 @@ class MetaData:
         """
         return self.meta["layers"]["layer1"]["externalContracts"][name]
 
-    def getL2ExtContractAddress(self, name):
+    def get_l2_ext_contract_address(self, name):
         """
         Retrieve Layer 2 external contract address.
 

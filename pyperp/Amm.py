@@ -5,7 +5,7 @@ from pyperp import MetaData, Providers, utils
 import pkgutil
 from pyperp.constants import Dir
 
-def getAmmInfo(provider, pair=None):
+def get_amm_info(provider, pair=None):
     """
     Return Amm information for all amms or a particular amm.
 
@@ -13,204 +13,293 @@ def getAmmInfo(provider, pair=None):
     providers -- a Providers object
     pair -- A string value representing a pair.
     """
-    insuranceFundAbi = json.loads(
+    insurance_fund_abi = json.loads(
         pkgutil.get_data(__name__, "abi/InsuranceFund.json")
     )
-    clearingHouseAbi = json.loads(
+    clearing_house_abi = json.loads(
         pkgutil.get_data(__name__, "abi/ClearingHouse.json")
     )
-    ammAbi = json.loads(pkgutil.get_data(__name__, "abi/Amm.json"))
+    amm_abi = json.loads(pkgutil.get_data(__name__, "abi/Amm.json"))
 
     meta = MetaData(provider.testnet)
-    insuranceFundAddr = meta.getL2ContractAddress("InsuranceFund")
-    clearingHouseAddr = meta.getL2ContractAddress("ClearingHouse")
+    insurance_fund_addr = meta.getL2ContractAddress("InsuranceFund")
+    clearing_house_addr = meta.getL2ContractAddress("ClearingHouse")
 
-    insuranceFund = provider.l2.eth.contract(
-        address=insuranceFundAddr, abi=insuranceFundAbi
+    insurance_fund = provider.l2.eth.contract(
+        address=insurance_fund_addr, abi=insurance_fund_abi
     )
-    clearingHouse = provider.l2.eth.contract(
-        address=clearingHouseAddr, abi=clearingHouseAbi
+    clearing_house = provider.l2.eth.contract(
+        address=clearing_house_addr, abi=clearing_house_abi
     )
 
     data = []
 
-    ammAddressList = insuranceFund.functions.getAllAmms().call()
+    amm_address_list = insurance_fund.functions.getAllAmms().call()
 
-    for addr in ammAddressList:
-        amm = provider.l2.eth.contract(address=addr, abi=ammAbi)
-        priceFeedKey = amm.functions.priceFeedKey().call().decode(
+    for addr in amm_address_list:
+        amm = provider.l2.eth.contract(address=addr, abi=amm_abi)
+        price_feed_key = amm.functions.priceFeedKey().call().decode(
             "utf-8", "ignore"
         )
-        if pair is not None and pair != priceFeedKey:
+        if pair is not None and pair != price_feed_key:
             continue
 
-        openInterestNotionalCap = amm.functions.getOpenInterestNotionalCap(
+        open_interest_notional_cap = amm.functions.getOpenInterestNotionalCap(
         ).call()
-        openInterestNotional = clearingHouse.functions.openInterestNotionalMap(
+        open_interest_notional = clearing_house.functions.openInterestNotionalMap(
             addr
         ).call()
-        maxHoldingBaseAsset = amm.functions.getMaxHoldingBaseAsset().call()
-        indexPrice = amm.functions.getUnderlyingPrice().call()
-        marketPrice = amm.functions.getSpotPrice().call()
+        max_holding_base_asset = amm.functions.getMaxHoldingBaseAsset().call()
+        index_price = amm.functions.getUnderlyingPrice().call()
+        market_price = amm.functions.getSpotPrice().call()
         reserve = amm.functions.getReserve().call()
-        quoteAssetReserve = reserve[0]
-        baseAssetReserve = reserve[1]
-        priceFeed = amm.functions.priceFeed().call()
-        estFundingRate = (utils.estimatedFundingRate(amm) / 1e18) * 100
+        quote_asset_reserve = reserve[0]
+        base_asset_reserve = reserve[1]
+        price_feed = amm.functions.priceFeed().call()
+        est_funding_rate = (utils.estimated_funding_rate(amm) / 1e18) * 100
 
-        if priceFeed == meta.getL2ContractAddress("L2PriceFeed"):
-            priceFeedName = "L2PriceFeed"
-        elif priceFeed == meta.getL2ContractAddress("ChainlinkPriceFeed"):
-            priceFeedName = "ChainlinkPriceFeed"
+        if price_feed == meta.getL2ContractAddress("L2PriceFeed"):
+            price_feed_name = "L2PriceFeed"
+        elif price_feed == meta.getL2ContractAddress("ChainlinkPriceFeed"):
+            price_feed_name = "ChainlinkPriceFeed"
         else:
             ValueError(
                 "PriceFeed is not L2PriceFeed or ChainlinkPriceFeed, address: "
-                + priceFeed
+                + price_feed
             )
 
         data.append(
             {
-                "pair": f"{priceFeedKey}/USDC",
+                "pair": f"{price_feed_key}/USDC",
                 "Proxy Address": addr,
-                "Index Price": f"{utils.formatUnits(indexPrice[0])} USDC",
-                "Market Price": f"{utils.formatUnits(marketPrice[0])} USDC",
-                "OpenInterestNotionalCap": f"{utils.formatUnits(openInterestNotionalCap[0])}\
+                "Index Price": f"{utils.format_units(index_price[0])} USDC",
+                "Market Price": f"{utils.format_units(market_price[0])} USDC",
+                "OpenInterestNotionalCap": f"{utils.format_units(open_interest_notional_cap[0])}\
                  USDC",
-                "OpenInterestNotional": f"{utils.formatUnits(openInterestNotional)}\
+                "OpenInterestNotional": f"{utils.format_units(open_interest_notional)}\
                  USDC",
-                "MaxHoldingBaseAsset": f"{utils.formatUnits(maxHoldingBaseAsset[0])}\
+                "MaxHoldingBaseAsset": f"{utils.format_units(max_holding_base_asset[0])}\
                  USDC",
-                "QuoteAssetReserve": f"{utils.formatUnits(quoteAssetReserve[0])}\
+                "QuoteAssetReserve": f"{utils.format_units(quote_asset_reserve[0])}\
                  USDC",
-                "BaseAssetReserve": f"{utils.formatUnits(baseAssetReserve[0])}\
-                {priceFeedKey}USDC",
-                "PriceFeed": priceFeedName,
-                "est.funding rate": f"{estFundingRate} %",
+                "BaseAssetReserve": f"{utils.format_units(base_asset_reserve[0])}\
+                {price_feed_key}USDC",
+                "PriceFeed": price_feed_name,
+                "est.funding rate": f"{est_funding_rate} %",
             }
         )
 
     return data
 
-def getInputTwapAmount(
+def get_input_twap_amount(
     provider: Providers,
     pair: str,
-    dirOfQuote: Dir,
-    quoteAssetAmount: float
+    dir_of_quote: Dir,
+    quote_asset_amount: float
 ):
-    amm = utils.getAmm(pair, provider)
-    inputTwap = amm.functions.getInputTwap(
-        dirOfQuote.value, 
-        {'d': utils.parseUnits(quoteAssetAmount)}
+    """
+    Returns input twap amount.
+
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    dir_of_quote -- Dir.ADD_TO_AMM or Dir.REMOVE_FROM_AMM
+    quote_asset_amount -- quote asset amount
+    """
+    amm = utils.get_amm(pair, provider)
+    input_twap = amm.functions.getInputTwap(
+        dir_of_quote.value, 
+        {'d': utils.parse_units(quote_asset_amount)}
         ).call()
-    return inputTwap[0]
+    return input_twap[0]
 
-def getOutputTwapAmount(
+def get_output_twap_amount(
     provider: Providers,
     pair: str,
-    dirOfQuote: Dir,
-    baseAssetAmount: float
+    dir_of_quote: Dir,
+    base_asset_amount: float
 ):
-    amm = utils.getAmm(pair, provider)
-    outputTwap = amm.functions.getOutputTwap(
-        dirOfQuote.value,
-        {'d': utils.parseUnits(baseAssetAmount)}
-    ).call()
-    return outputTwap[0]
+    """
+    Returns output twap amount.
 
-def getInputPrice(
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    dir_of_quote -- Dir.ADD_TO_AMM or Dir.REMOVE_FROM_AMM
+    base_asset_amount -- base asset amount
+    """
+    amm = utils.get_amm(pair, provider)
+    output_twap = amm.functions.getOutputTwap(
+        dir_of_quote.value,
+        {'d': utils.parse_units(base_asset_amount)}
+    ).call()
+    return output_twap[0]
+
+def get_input_price(
     provider: Providers,
     pair: str,
-    dirOfQuote: Dir,
-    quoteAssetAmount: float
+    dir_of_quote: Dir,
+    quote_asset_amount: float
 ):
-    amm = utils.getAmm(pair,provider)
-    inputPrice = amm.functions.getInputPrice(
-        dirOfQuote.value,
-        {'d': utils.parseUnits(quoteAssetAmount)}
-    ).call()
-    return inputPrice[0]
+    """
+    Returns input price.
 
-def getOutputPrice(
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    dir_of_quote -- Dir.ADD_TO_AMM or Dir.REMOVE_FROM_AMM
+    quote_asset_amount -- quote asset amount
+    """
+    amm = utils.get_amm(pair,provider)
+    input_price = amm.functions.getInputPrice(
+        dir_of_quote.value,
+        {'d': utils.parse_units(quote_asset_amount)}
+    ).call()
+    return input_price[0]
+
+def get_output_price(
     provider: Providers,
     pair: str,
-    dirOfQuote: Dir,
-    baseAssetAmount: float
+    dir_of_quote: Dir,
+    base_asset_amount: float
 ):
-    amm = utils.getAmm(pair, provider)
-    outputPrice = amm.functions.getOutputPrice(
-        dirOfQuote.value,
-        {'d': utils.parseUnits(baseAssetAmount)}
-    ).call()
-    return outputPrice[0]
+    """
+    Returns output twap amount.
 
-def getUnderlyingPrice(
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    dir_of_quote -- Dir.ADD_TO_AMM or Dir.REMOVE_FROM_AMM
+    base_asset_amount -- base asset amount
+    """
+    amm = utils.get_amm(pair, provider)
+    output_price = amm.functions.getOutputPrice(
+        dir_of_quote.value,
+        {'d': utils.parse_units(base_asset_amount)}
+    ).call()
+    return output_price[0]
+
+def get_underlying_price(
     provider: Providers,
     pair: str
 ):
-    amm = utils.getAmm(pair, provider)
-    underlyingPrice = amm.functions.getUnderlyingPrice().call()
-    return underlyingPrice[0]
+    """
+    Returns underlying price.
 
-def getUnderlyingTwapPrice(
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    """
+    amm = utils.get_amm(pair, provider)
+    underlying_price = amm.functions.getUnderlyingPrice().call()
+    return underlying_price[0]
+
+def get_underlying_twap_price(
     provider: Providers,
     pair: str,
-    intervalInSeconds: int
+    interval_in_seconds: int
 ):
-    amm = utils.getAmm(pair, provider)
-    underlyingTwapPrice = amm.functions.getUnderlyingTwapPrice(
-        intervalInSeconds
-    ).call()
-    return underlyingTwapPrice[0]
+    """
+    Returns underlying twap price.
 
-def getSpotPrice(
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    interval_in_seconds -- interval in seconds 
+    """
+    amm = utils.get_amm(pair, provider)
+    underlying_twap_price = amm.functions.getUnderlyingTwapPrice(
+        interval_in_seconds
+    ).call()
+    return underlying_twap_price[0]
+
+def get_spot_price(
     provider: Providers,
     pair: str
 ):
-    amm = utils.getAmm(pair, provider)
-    reserve = getQuoteAndBaseAssetReserve(provider, pair)
+    """
+    Returns spot price.
+
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    """
+    amm = utils.get_amm(pair, provider)
+    reserve = get_quote_and_base_asset_reserve(provider, pair)
     return reserve["quoteAssetReserve"]/reserve["baseAssetReserve"]
     
-def getTwapPrice(
+def get_twap_price(
     provider: Providers,
     pair: str,
-    intervalInSeconds: int
+    interval_in_seconds: int
 ):
-    amm = utils.getAmm(pair, provider)
-    twapPrice = amm.functions.getTwapPrice(
-        intervalInSeconds
-    ).call()
-    return twapPrice[0]
+    """
+    Returns twap price.
 
-def getQuoteAndBaseAssetReserve(
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    interval_in_seconds -- interval in seconds 
+    """
+    amm = utils.get_amm(pair, provider)
+    twap_price = amm.functions.getTwapPrice(
+        interval_in_seconds
+    ).call()
+    return twap_price[0]
+
+def get_quote_and_base_asset_reserve(
     provider: Providers,
     pair: str,
 ):
-    amm = utils.getAmm(pair, provider)
+    """
+    Returns quote asset and base asset reserve.
+
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    """
+    amm = utils.get_amm(pair, provider)
     reserve = amm.functions.getReserve().call()
     return {
         "quoteAssetReserve": reserve[0][0],
         "baseAssetReserve": reserve[1][0]
     }
 
-def calculateTollAndSpreadFee(
+def calculate_toll_and_spread_fee(
     provider: Providers,
     pair: str,
-    quoteAssetAmount: float
+    quote_asset_amount: float
 ):
-    amm = utils.getAmm(pair, provider)
+    """
+    Calculates toll and spread fee.
+
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    quote_asset_amount -- quote asset amount
+    """
+    amm = utils.get_amm(pair, provider)
     fee = amm.functions.calcFee(
-        {'d': utils.parseUnits(quoteAssetAmount)}
+        {'d': utils.parse_units(quote_asset_amount)}
     ).call()
     return {
         "tollRatio": fee[0][0],
         "spreadRatio": fee[1][0]
     }
 
-def getPriceImpact(
+def get_price_impact(
     provider: Providers,
     pair: str,
-    entryPrice: float
+    entry_price: float
 ):
-    spotPrice = getSpotPrice(provider, pair)
-    priceImpact = (entryPrice-spotPrice)*100/spotPrice
-    return priceImpact
+    """
+    Returns price impact.
+
+    Arguments:
+    provider -- A Providers object
+    pair -- A string representing an amm pair
+    entry_price -- entry price for the trade
+    """
+    spot_price = get_spot_price(provider, pair)
+    price_impact = (entry_price-spot_price)*100/spot_price
+    return price_impact

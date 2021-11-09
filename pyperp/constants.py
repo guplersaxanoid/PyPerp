@@ -1,8 +1,8 @@
 from enum import Enum
 
-MaxUInt256 = 2**256-1
+max_u_int256 = 2**256-1
 
-AvailableAmms = {
+available_amms = {
     "mainnet": [
         "ETHUSDC", "BTCUSDC", "YFIUSDC",
         "DOTUSDC", "SNXUSDC", "LINKUSDC",

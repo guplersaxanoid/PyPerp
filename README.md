@@ -50,13 +50,13 @@ This USDC faucet is hosted by the Perpetual Protocol team, and it can be used on
 allow layer1 bridge to use your USDC funds if not done already
 
 ```
-receipt = trader.approveL1BridgetoUseUSDC({"GasPrice":<gas price>, "GasLimit":<gas limit>})
+receipt = trader.approve_l1_bridge_to_use_usdc({"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
 Then, call `depositUsdcToXdai()`
 ```
-receipt = trader.depositUsdcToxDai(100,{"GasPrice":<gas price>, "GasLimit":<gas limit>}) #move 100 USDC to xDai 
+receipt = trader.deposit_usdc_to_xdai(100,{"GasPrice":<gas price>, "GasLimit":<gas limit>}) #move 100 USDC to xDai 
 ```
 
 4.) open a position 
@@ -64,7 +64,7 @@ receipt = trader.depositUsdcToxDai(100,{"GasPrice":<gas price>, "GasLimit":<gas 
 allow ClearingHouse contract to use the USDC in your xDai if not done already. 
 
 ```
-receipt = trader.approveClearingHouseToUseUSDC({"GasPrice":<gas price>, "GasLimit":<gas limit>})
+receipt = trader.approve_clearing_house_to_use_usdc({"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
@@ -73,45 +73,45 @@ Open a position with a pair of your choice using the openPosition() method in Tr
 ```
 from pyperp import constants
 
-receipt = trader.openPosition("ETHUSDC",constants.Side.SHORT.value,100,2,0,{"GasPrice":<gas price>, "GasLimit":<gas limit>})
+receipt = trader.open_position("ETHUSDC",constants.Side.SHORT.value,100,2,0,{"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
-the openPosition() function takes the following parameters:
+the open_position() function takes the following parameters:
 1. The pair: the pair has to chosen from the available pairs in `AvailableAmms` dict in `constants.py` file
 2. side: Has to be either constants.Side.LONG.value (0) or constants.Side.SHORT.value (1) 
-3. quoteAssetAmount
+3. quote_asset_amount
 4. leverage
-5. baseAssetAmountLimit
+5. base_asset_amount_aimit
 
 
 5.) get position information 
 
 ```
-print(trader.getPersonalPositionWithFundingPayment("ETHUSDC"))
-print(trader.getUnrealizedPnl("ETHUSDC",constants.PnlCalcOption.SPOT_PRICE))
+print(trader.get_personal_position_with_funding_payment("ETHUSDC"))
+print(trader.get_unrealized_pnl("ETHUSDC",constants.PnlCalcOption.SPOT_PRICE))
 ```
 
-The second parameter of the getUnrealizedPnl function is the PnlCalcOption which can be any of these three values : constants.PnlCalcOption.SPOT_PRICE(0), constants.PnlCalcOption.TWAP(1), constants.PnlCalcOption.ORACLE(2)
+The second parameter of the get_unrealized_pnl function is the PnlCalcOption which can be any of these three values : constants.PnlCalcOption.SPOT_PRICE(0), constants.PnlCalcOption.TWAP(1), constants.PnlCalcOption.ORACLE(2)
 
 6.) add margin to position:
 
 ```
-receipt = trader.addMargin("ETHUSDC", 10, {"GasPrice":<gas price>, "GasLimit":<gas limit>})
+receipt = trader.add_margin("ETHUSDC", 10, {"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
 7.) remove margin:
 
 ```
-receipt = trader.removeMargin("ETHUSDC", 10, {"GasPrice":<gas price>, "GasLimit":<gas limit>})
+receipt = trader.remove_margin("ETHUSDC", 10, {"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
 8.) close a position:
 
 ```
-receipt = trader.closePosition("ETHUSDC",0, {"GasPrice":<gas price>, "GasLimit":<gas limit>}) #the second parameter is quote asset amount limit
+receipt = trader.close_position("ETHUSDC",0, {"GasPrice":<gas price>, "GasLimit":<gas limit>}) #the second parameter is quote asset amount limit
 print(receipt)
 ```
 
@@ -120,14 +120,14 @@ print(receipt)
 allow Layer 2 Bridge to use the USDC if not done already
 
 ```
-reciept = trader.approveL2BridgeToUseUSDC({"GasPrice":<gas price>, "GasLimit":<gas limit>})
+reciept = trader.approve_l2_bridge_to_use_usdc({"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 
-then, withdraw USDC to L1 using `withdrawUsdcToEthereum()` function in `Trader` class
+then, withdraw USDC to L1 using `withdraw_usdc_to_ethereum()` function in `Trader` class
 
 ```
-receipt = trader.withdrawUsdcToEthereum(100,{"GasPrice":<gas price>, "GasLimit":<gas limit>})
+receipt = trader.withdraw_usdc_to_ethereum(100,{"GasPrice":<gas price>, "GasLimit":<gas limit>})
 print(receipt)
 ```
 

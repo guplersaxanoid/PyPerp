@@ -8,7 +8,7 @@ import datetime
 import pkgutil
 
 
-def confirmTransferToLayer2(receipt, provider):
+def confirm_transfer_to_layer2(receipt, provider):
     """
     Confirm transfer from layer 1 to layer2 through RootBrige.
 
@@ -17,28 +17,28 @@ def confirmTransferToLayer2(receipt, provider):
     provider -- A Provider object
     """
     meta = MetaData(provider.testnet)
-    layer2AmbAbi = json.loads(pkgutil.get_data(__name__, "abi/AmbL2.json"))
-    layer2AmbAddr = meta.getL2ExtContractAddress("ambBrideOnXDai")
-    layer2Amb = provider.l2.eth.contract(
-        address=layer2AmbAddr,
-        abi=layer2AmbAbi
+    layer2_amb_abi = json.loads(pkgutil.get_data(__name__, "abi/AmbL2.json"))
+    layer2_amb_addr = meta.get_l2_ext_contract_address("ambBrideOnXDai")
+    layer2_amb = provider.l2.eth.contract(
+        address=layer2_amb_addr,
+        abi=layer2_amb_abi
     )
-    methodId = "0x482515ce"
+    method_id = "0x482515ce"
     for r in receipt:
         log = r["logs"]
-        if log.topics[0][:10] == methodId:
+        if log.topics[0][:10] == method_id:
             break
-    fromMsgId = log.topics[1]
-    confirmationFilter = layer2Amb.events.AffirmationCompleted.createFilter(
-        fromBlock="latest", argument_filters={"toMsgId": fromMsgId}
+    from_msg_id = log.topics[1]
+    confirmation_filter = layer2_amb.events.AffirmationCompleted.createFilter(
+        fromBlock="latest", argument_filters={"toMsgId": from_msg_id}
     )
     while True:
-        for c in confirmationFilter:
+        for c in confirmation_filter:
             print("Transfer completed")
             return
 
 
-def confirmTransferToLayer1(reciept, provider):
+def confirm_transfer_to_layer1(reciept, provider):
     """
     Confirm transfer from layer 2 to layer 1 through ClientBridge.
 
@@ -47,62 +47,62 @@ def confirmTransferToLayer1(reciept, provider):
     provider -- A Providers object
     """
     meta = MetaData(provider.testnet)
-    layer1AmbAbi = json.loads(pkgutil.get_data(__name__, "abi/AmbL1.json"))
-    layer1AmbAddr = meta.getL1ExtContractAddress("ambBridgeOnEth")
-    layer1Amb = provider.l1.eth.contract(
-        address=layer1AmbAddr,
-        abi=layer1AmbAbi
+    layer1_amb_abi = json.loads(pkgutil.get_data(__name__, "abi/AmbL1.json"))
+    layer1_amb_addr = meta.get_l1_ext_contract_address("ambBridgeOnEth")
+    layer1_amb = provider.l1.eth.contract(
+        address=layer1_amb_addr,
+        abi=layer1_amb_abi
     )
-    methodId = "0x520d2afd"
+    method_id = "0x520d2afd"
     for r in reciept:
         log = r["logs"]
-        if log.topics[0][:10] == methodId:
+        if log.topics[0][:10] == method_id:
             break
-    fromMsgId = log.topics[1]
-    confirmationFilter = layer1Amb.events.RelayedMessage.createFilter(
-        fromBlock="latest", argument_filters={"toMsgId": fromMsgId}
+    from_msg_id = log.topics[1]
+    confirmation_filter = layer1_amb.events.RelayedMessage.createFilter(
+        fromBlock="latest", argument_filters={"toMsgId": from_msg_id}
     )
     while True:
-        for c in confirmationFilter:
+        for c in confirmation_filter:
             print("Transfer completed")
             return
 
 
-def getAmm(amm, provider):
+def get_amm(pair, provider):
     """
     Return web3.eth.contract object for given amm.
 
     Arguments:
-    amm -- A string representing the amm pair
+    pair -- A string representing the amm pair
     provider -- A Providers object
     """
     if provider.testnet:
-        Amms = constants.AvailableAmms["testnet"]
+        amms = constants.available_amms["testnet"]
     else:
-        Amms = constants.AvailableAmms["mainnet"]
+        amms = constants.available_amms["mainnet"]
 
-    if amm not in Amms:
-        raise ValueError(f"Unknown pair: {amm}")
+    if pair not in amms:
+        raise ValueError(f"Unknown pair: {pair}")
 
     meta = MetaData(provider.testnet)
-    AmmAddr = meta.getL2ContractAddress(amm)
-    AmmAbi = json.loads(pkgutil.get_data(__name__, "abi/Amm.json"))
+    amm_addr = meta.get_l2_contract_address(pair)
+    amm_abi = json.loads(pkgutil.get_data(__name__, "abi/Amm.json"))
 
-    Amm = provider.l2.eth.contract(address=AmmAddr, abi=AmmAbi)
-    return Amm
+    amm = provider.l2.eth.contract(address=amm_addr, abi=amm_abi)
+    return amm
 
 
-def estimateLiquidationPrice(position, amm, clearingHouse):
+def estimate_liquidation_price(position, amm, clearing_house):
     """
     Estimate liquidation price for a position.
 
     Arguments:
     position: The position data
     amm: web3.eth.contract object for the amm
-    clearingHouse: web3.eth.contract object for ClearingHouse
+    clearing_house: web3.eth.contract object for ClearingHouse
     """
-    spotPrice = amm.functions.getSpotPricer.call().d
-    realCloseQuoteAmount = (
+    spot_price = amm.functions.getSpotPricer.call().d
+    real_close_quote_amount = (
         amm.functions.getOutputPrice(
             0 if position.size.d > 0 else 1,
             json.dumps(f"d: {abs(position.size.d)}")
@@ -110,31 +110,31 @@ def estimateLiquidationPrice(position, amm, clearingHouse):
         .call()
         .d
     )
-    maintanenceMarginRatio = clearingHouse.functions.maintanenceMarginRatio(
+    maintanence_margin_ratio = clearing_house.functions.maintanenceMarginRatio(
     ).call()
-    openNotional = position.openNotional.d
-    positionSizeAbs = abs(position.size.d)
+    open_notional = position.openNotional.d
+    position_size_abs = abs(position.size.d)
     margin = position.margin.d
-    entryPrice = openNotional / positionSizeAbs
-    reverseLeverage = margin / openNotional
-    spotCloseQuoteAmount = spotPrice * positionSizeAbs
-    closePosPriceSlippage = (
-        realCloseQuoteAmount - spotCloseQuoteAmount
-    ) / spotCloseQuoteAmount
+    entry_price = open_notional / position_size_abs
+    reverse_leverage = margin / open_notional
+    spot_close_quote_amount = spot_price * position_size_abs
+    close_pos_price_slippage = (
+        real_close_quote_amount - spot_close_quote_amount
+    ) / spot_close_quote_amount
     if position.size.d > 0:
-        liquidationPrice = entryPrice * (
-            1 - reverseLeverage - closePosPriceSlippage
-            + maintanenceMarginRatio
+        liquidation_price = entry_price * (
+            1 - reverse_leverage - close_pos_price_slippage
+            + maintanence_margin_ratio
         )
     else:
-        liquidationPrice = entryPrice * (
-            1 + reverseLeverage - closePosPriceSlippage
-            - maintanenceMarginRatio
+        liquidation_price = entry_price * (
+            1 + reverse_leverage - close_pos_price_slippage
+            - maintanence_margin_ratio
         )
-    return liquidationPrice
+    return liquidation_price
 
 
-def parseUnits(amount, decimal=constants.DEFAULT_DECIMALS):
+def parse_units(amount, decimal=constants.DEFAULT_DECIMALS):
     """
     Return value parsed to given decimal units.
 
@@ -145,7 +145,7 @@ def parseUnits(amount, decimal=constants.DEFAULT_DECIMALS):
     return int(amount * (10 ** decimal))
 
 
-def formatUnits(amount, decimal=constants.DEFAULT_DECIMALS):
+def format_units(amount, decimal=constants.DEFAULT_DECIMALS):
     """
     Return value formatted to given decimal units.
 
@@ -156,63 +156,90 @@ def formatUnits(amount, decimal=constants.DEFAULT_DECIMALS):
     return amount / (10 ** decimal)
 
 
-def estimatedFundingRate(amm):
+def estimated_funding_rate(amm):
     """
     Return estimate funding rate for an amm.
 
     Arguments:
     amm -- web3.eth.contract object representing amm
     """
-    durationFromSharp = datetime.datetime.now().minute * 60
-    twapPrice = amm.functions.getTwapPrice(durationFromSharp).call()
-    underlyingTwapPrice = amm.functions.getUnderlyingTwapPrice(
-        durationFromSharp
+    duration_from_sharp = datetime.datetime.now().minute * 60
+    twap_price = amm.functions.getTwapPrice(duration_from_sharp).call()
+    underlying_twap_price = amm.functions.getUnderlyingTwapPrice(
+        duration_from_sharp
     ).call()
-    fundingPeriod = amm.functions.fundingPeriod().call()
-    oneDayInSec = 60 * 60 * 24
-    marketTwapPrice = formatUnits(twapPrice[0])
-    indexTwapPrice = formatUnits(underlyingTwapPrice[0])
-    premium = marketTwapPrice - indexTwapPrice
-    premiumFraction = premium * fundingPeriod / oneDayInSec
-    return parseUnits(premiumFraction / indexTwapPrice)
+    funding_period = amm.functions.fundingPeriod().call()
+    one_day_in_sec = 60 * 60 * 24
+    market_twap_price = format_units(twap_price[0])
+    index_twap_price = format_units(underlying_twap_price[0])
+    premium = market_twap_price - index_twap_price
+    premium_fraction = premium * funding_period / one_day_in_sec
+    return parse_units(premium_fraction / index_twap_price)
 
-def getBaseAssetAmountLimit(
+def get_base_asset_amount_limit(
     provider: Providers,
     pair: str,
-    quoteAssetAmount: float,
-    slippageTolerance: float,
-    dirOfQuote: constants.Dir
+    quote_asset_amount: float,
+    slippage_tolerance: float,
+    dir_of_quote: constants.Dir
 ):
+    """
+    Base asset amount limit for given slippage.
 
-    baseAssetAmount = Amm.getInputPrice(
-        provider, pair, dirOfQuote, quoteAssetAmount
+    Arguments:
+    provider -- Providers object
+    pair -- string representing amm pair
+    quote_asset_amount -- The quote asset amount
+    slippage_tolerance -- percentage of slippage tolerance
+    dir_of_quote -- Dir.ADD_TO_AMM or Dir.REMOVE_FROM_AMM
+    """
+    base_asset_amount = Amm.get_input_price(
+        provider, pair, dir_of_quote, quote_asset_amount
     )
-    baseAssetAmountLimit = baseAssetAmount * (1-slippageTolerance/100)
-    return baseAssetAmountLimit
+    base_asset_amount_limit = base_asset_amount * (1-slippage_tolerance/100)
+    return base_asset_amount_limit
 
-def getQuoteAssetAmountLimit(
+def get_quote_asset_amount_limit(
     provider: Providers,
     pair: str,
-    baseAssetAmount: float,
-    slippageTolerance: float,
-    dirOfQuote: constants.Dir
+    base_asset_amount: float,
+    slippage_tolerance: float,
+    dir_of_quote: constants.Dir
 ):
+    """
+    quote asset amount limit for given slippage.
 
-    quoteAssetAmount = Amm.getOutputPrice(
-        provider, pair, dirOfQuote, baseAssetAmount
+    Arguments:
+    provider -- Providers object
+    pair -- string representing amm pair
+    base_asset_amount -- The base asset amount
+    slippage_tolerance -- percentage of slippage tolerance
+    dir_of_quote -- Dir.ADD_TO_AMM or Dir.REMOVE_FROM_AMM
+    """
+    quote_asset_amount = Amm.get_output_price(
+        provider, pair, dir_of_quote, base_asset_amount
     )
-    quoteAssetAmountLimit = quoteAssetAmount * (1-slippageTolerance/100)
-    return quoteAssetAmountLimit
+    quote_asset_amount_limit = quote_asset_amount * (1-slippage_tolerance/100)
+    return quote_asset_amount_limit
 
-def calcEntryPrice(
+def calc_entry_price(
     provider: Providers,
     pair: str,
     collateral: float,
     leverage: float,
-    dirOfQuote: constants.Dir
+    dir_of_quote: constants.Dir
 ):
+    """
+    calculates entry price for a trade.
 
-    positionSize = Amm.getInputPrice(
-        provider, pair, dirOfQuote, collateral
+    Arguments:
+    provider -- Providers object
+    pair -- string representing amm pair
+    collateral -- collateral amount in usdc
+    leverage -- leverage value between 1 and 10
+    dir_of_quote -- Dir.ADD_TO_AMM or Dir.REMOVE_FROM_AMM
+    """
+    position_size = Amm.get_input_price(
+        provider, pair, dir_of_quote, collateral
     )
-    return collateral*leverage/formatUnits(positionSize)
+    return collateral*leverage/format_units(position_size)
