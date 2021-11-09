@@ -39,7 +39,7 @@ trader = Trader(provider, l1wallet, l2wallet)
 ```
 from pyperp import Faucets
 
-response = Faucets.getUsdcL1(trader.layer1wallet.address)
+response = Faucets.get_usdc_l1(trader.layer1wallet.address)
 print(response)
 ```
 
