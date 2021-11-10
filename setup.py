@@ -9,7 +9,7 @@ with open('./README.md') as readme:
 setup(
     name = 'pyperp',        
     packages = ['pyperp'],  
-    version = '1.0.0',      
+    version = '1.0.1',      
     license='MIT',        
     description = 'python SDK for Perpetual Protocol',
     long_description_content_type='text/markdown',
