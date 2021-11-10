@@ -1,8 +1,8 @@
 """utility function to be used throughout the package."""
 
 import json
-from pyperp import Providers, Amm
-from pyperp.MetaData import MetaData
+from pyperp import Providers, amm
+from pyperp import MetaData
 from pyperp import constants
 import datetime
 import pkgutil
@@ -21,7 +21,7 @@ def confirm_transfer_to_layer2(receipt, provider):
     layer2_amb_addr = meta.get_l2_ext_contract_address("ambBrideOnXDai")
     layer2_amb = provider.l2.eth.contract(
         address=layer2_amb_addr,
-        abi=layer2_amb_abi
+        abi=layer2_amab_abi
     )
     method_id = "0x482515ce"
     for r in receipt:
