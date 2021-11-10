@@ -1,25 +1,18 @@
-from pyperp.Trader import (
-    Trader
-)
-
-from pyperp.Providers import (
-    Providers
-)
-
-from pyperp.MetaData import (
-    MetaData
-)
-
-import pyperp.Faucets
-import pyperp.constants
-import pyperp.utils
-
+import pyperp.faucets as faucets
+import pyperp.constants as constants
+from pyperp.metadata import *
+from pyperp.providers import *
+import pyperp.utils as utils
+import pyperp.amm as amm
+from pyperp.trader import *
 
 __all__ = [
+    "trader",
+    "amm",
     "constants",
-    "Faucets",
-    "MetaData",
-    "Providers",
-    "Trader",
+    "faucets",
+    "metadata",
+    "providers",
+    "trader",
     "utils"
 ]
