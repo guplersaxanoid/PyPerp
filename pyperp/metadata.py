@@ -22,7 +22,7 @@ class MetaData:
         """Getter for metadata URL."""
         return self._store
 
-    @metadataStore.setter
+    @metadata_store.setter
     def metadata_store(self, s):
         """Get metadata URL."""
         self._store = s
