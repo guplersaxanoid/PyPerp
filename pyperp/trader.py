@@ -2,7 +2,7 @@
 
 from pyperp import constants
 import json
-from pyperp.MetaData import MetaData
+from pyperp import MetaData
 from pyperp import utils
 import pkgutil
 
