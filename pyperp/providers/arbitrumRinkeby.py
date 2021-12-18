@@ -4,6 +4,7 @@ class ArbitrumRinkebyProvider(ApiProvider):
     
     def __init__(
         self, 
-        endpoint: str    
+        endpoint: str,
     ):
         super().__init__(endpoint)
+        self.abi_dir = "arbitrumRinkeby"

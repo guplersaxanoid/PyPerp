@@ -7,3 +7,4 @@ class OptimismProvider(ApiProvider):
         endpoint: str    
     ):
         super().__init__(endpoint)
+        self.abi_dir = "optimism"
