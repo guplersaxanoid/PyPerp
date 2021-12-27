@@ -1,21 +1,16 @@
-from dataclasses import dataclass
+from typing import Optional
 
 @dataclass
-class OpenPositionParam:
-    base_token: str
-    is_base_to_quote: bool
-    is_exact_amount: bool
-    amount: int
-    opposite_amount_bound: int
-    deadline: int
-    sqrt_price_limit_x96: int
-    referral_code: str
+class GasParams:
+    gas: int
+    gas_price: Optional[int]
+    max_fee_per_gas: Optional[int]
+    max_priority_fee_per_gas: Optional[int]
 
-@dataclass
-class ClosePositionParams:
-    base_token: str
-    sqrt_price_limit_x96: int
-    opposite_amount_boundL: int
-    deadline: int
-    referral_code: str
-
+    def toDict(self):
+        return {
+            'gas': self.gas,
+            'gasPrice': self.gasPrice,
+            'maxFeePerGas': self.max_fee_per_gas,
+            'maxPriorityFeePerGas': self.max_priority_fee_per_gas
+        }
