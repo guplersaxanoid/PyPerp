@@ -1,7 +1,7 @@
-from pyperp import ApiProvider
+from pyperp.providers import ApiProvider
 import eth_account import Account
 from web3 import Web3
-from pyperp.orderBook.types import (
+from pyperp.contracts.types import (
     OpenOrderInfo,
     FundingGrowth
 )
@@ -131,6 +131,7 @@ class OrderBook:
         ).call()
 
     def get_total_order_debt(
+        self,
         trader,
         base_token,
         fetch_base

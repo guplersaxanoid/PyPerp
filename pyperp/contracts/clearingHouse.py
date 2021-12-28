@@ -1,11 +1,11 @@
-from pyperp import ApiProvider
-from pyperp.clearingHouse.types import (
+from pyperp.providers import ApiProvider
+from pyperp.contracts.types import (
     AddLiquidityParams,
     OpenPositionParams,
     ClosePositionParams,
     RemoveLiquidityParams
 )
-from types import GasParams
+from pyperp.types import GasParams
 from web3 import Web3
 from eth_account import Account
 
@@ -50,6 +50,7 @@ class ClearingHouse:
 
     
     def add_liquidity(
+        self,
         params: AddLiquidityParams,
         gas_params: GasParams
     ):
@@ -72,6 +73,7 @@ class ClearingHouse:
         return receipt
 
     def remove_liquidity(
+        self,
         params: RemoveLiquidityParams,
         wallet: Account,
         gas_params: GasParams
@@ -95,11 +97,12 @@ class ClearingHouse:
         return receipt
 
     def settle_all_funding(
+        self,
         trader: str,
         gas_params: GasParams
     ):
         assert(
-            Web3.isAddress(trader)
+            Web3.isAddress(trader),
             f"Trader address {trader} must be an address"    
         )
         nonce = self._provider.eth.get_transaction_count(self.wallet.address)
@@ -121,6 +124,7 @@ class ClearingHouse:
         return receipt
 
     def open_position(
+        self,
         params: OpenPositionParams,
         gas_params: GasParams
     ):
@@ -143,6 +147,7 @@ class ClearingHouse:
         return receipt
 
     def close_position(
+        self,
         params: ClosePositionParams,
         gas_params: GasParams
     ):
@@ -165,6 +170,7 @@ class ClearingHouse:
         return receipt
 
     def liquidate(
+        self,
         trader: str,
         base_token: str,
         gas_params: GasParams
@@ -200,6 +206,7 @@ class ClearingHouse:
     #TODO: implement cancelExcessOrders
 
     def cancel_all_excess_orders(
+        self,
         maker: str,
         base_token: str,
         gas_params: GasParams
@@ -233,6 +240,7 @@ class ClearingHouse:
         return receipt
 
     def close_position_in_closed_market(
+        self,
         trader: str,
         base_token: str,
         gas_params: GasParams
@@ -266,6 +274,7 @@ class ClearingHouse:
         return receipt
 
     def uniswap_v3_mint_callback(
+        self,
         amount0Owed: int,
         amount1Owed: int,
         data: str,
@@ -292,6 +301,7 @@ class ClearingHouse:
         return receipt
 
     def uniswap_v3_mint_callback(
+        self,
         amount0Delta: int,
         amount1Delta: int,
         data: str,
@@ -317,34 +327,35 @@ class ClearingHouse:
 
         return receipt
 
-    def get_quote_token():
+    def get_quote_token(self):
         return self._clearing_house.functions.getQuoteToken(
         ).call()
 
-    def get_uniswap_v3_factory():
+    def get_uniswap_v3_factory(self):
         return self._clearing_house.functions.getUniswapV3Factory(
         ).call()
 
-    def get_clearing_house_config():
+    def get_clearing_house_config(self):
         return self._clearing_house.functions.getClearingHouseConfig(
         ).call()
     
-    def get_vault():
+    def get_vault(self):
         return self._clearing_house.functions.getVault().call()
 
-    def get_exchange():
+    def get_exchange(self):
         return self._clearing_house.functions.getExchange().call()
 
-    def get_order_book():
+    def get_order_book(self):
         return self._clearing_house.functions.getOrderBook().call()
 
-    def get_account_balance():
+    def get_account_balance(self):
         return self._clearing_house.functions.getAccountBalance().call()
 
-    def get_insurance_fund():
+    def get_insurance_fund(self):
         return self._clearing_house.functions.getInsuraceFund().call()
 
     def get_account_value(
+        self,
         trader: str
     ):
         assert(

@@ -1,5 +1,5 @@
-from pyperp import ApiProvider
-from pyperp.marketRegistry.types import (
+from pyperp.providers import ApiProvider
+from pyperp.contracts.types import (
     MarketInfo
 )
 import logging

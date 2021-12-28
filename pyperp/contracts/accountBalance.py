@@ -1,4 +1,4 @@
-from pyperp import ApiProvider
+from pyperp.providers import ApiProvider
 from web3 import Web3
 
 class AccountBalance:
@@ -15,6 +15,7 @@ class AccountBalance:
         logging.info("AccountBalance contract loaded")
 
     def get_base_tokens(
+        self,
         trader: str,
         base_token: str
     ):
@@ -32,6 +33,7 @@ class AccountBalance:
         ).call()
 
     def get_account_info(
+        self,
         trader: str,
         base_token: str
     ):
@@ -49,6 +51,7 @@ class AccountBalance:
         ).call()
 
     def get_taker_open_notional(
+        self,
         trader: str,
         base_token: str
     ):
@@ -66,6 +69,7 @@ class AccountBalance:
         ).call()
         
     def get_total_open_notional(
+        self,
         trader: str,
         base_token: str
     ):
@@ -83,6 +87,7 @@ class AccountBalance:
         ).call()
 
     def get_total_debt_value(
+        self,
         trader: str,
     ):
         assert(
@@ -94,6 +99,7 @@ class AccountBalance:
         ).call()
 
     def get_marginal_requirement_for_liquidation(
+        self,
         trader: str
     ):
         assert(
@@ -105,6 +111,7 @@ class AccountBalance:
         ).call()
 
     def get_pnl_and_pending_fee(
+        self,
         trader: str,
     ):
         assert(
@@ -116,6 +123,7 @@ class AccountBalance:
         ).call()
 
     def has_order(
+        self,
         trader: str
     ):
         assert(
@@ -127,6 +135,7 @@ class AccountBalance:
         ).call()
 
     def get_base(
+        self,
         trader: str,
         base_token: str
     ):
@@ -144,6 +153,7 @@ class AccountBalance:
         ).call()
 
     def get_quote(
+        self,
         trader: str,
         base_token: str
     ):
@@ -161,6 +171,7 @@ class AccountBalance:
         ).call()
 
     def get_taker_position_size(
+        self,
         trader: str,
         base_token: str
     ):
@@ -178,6 +189,7 @@ class AccountBalance:
         ).call()
 
     def get_total_position_size(
+        self,
         trader: str,
         base_token: str
     ):
@@ -195,6 +207,7 @@ class AccountBalance:
         ).call()
 
     def get_total_position_value(
+        self,
         trader: str,
         base_token: str
     ):
@@ -212,6 +225,7 @@ class AccountBalance:
         ).call()
 
     def get_account_info(
+        self,
         trader: str
     ):
         assert(
@@ -223,6 +237,7 @@ class AccountBalance:
         ).call()
 
     def settle_pnl_in_closed_market(
+        self,
         trader: str,
         base_token: str
     ):

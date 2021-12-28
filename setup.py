@@ -1,5 +1,5 @@
 
-from setuptools import setup
+from setuptools import setup, find_namespace_packages
 
 
 with open('./README.md') as readme:
@@ -8,7 +8,7 @@ with open('./README.md') as readme:
 
 setup(
     name = 'pyperp',        
-    packages = ['pyperp'],  
+    packages = find_namespace_packages(include=['pyperp.*']),  
     version = '1.0.1',      
     license='MIT',        
     description = 'python SDK for Perpetual Protocol',

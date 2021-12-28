@@ -1,7 +1,6 @@
 from pyperp.providers import ApiProvider
 from eth_account import Account
-
-class OptimismKovanProvider(ApiProvider):
+class OptimismProvider(ApiProvider):
     
     def __init__(
         self, 
@@ -9,4 +8,4 @@ class OptimismKovanProvider(ApiProvider):
         account: Account
     ):
         super().__init__(endpoint, account)
-        self.abi_dir = "optimismKovan"
+        self.abi_dir = "optimism"
