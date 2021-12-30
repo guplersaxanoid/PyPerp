@@ -1,28 +1,29 @@
 from pyperp.providers import ApiProvider
-import eth_account import Account
+from eth_account import Account
 from web3 import Web3
 from pyperp.contracts.types import (
     OpenOrderInfo,
     FundingGrowth
 )
+from typing import List
+import logging
 
 class OrderBook:
     def __init__(
         self,
-        provider: ApiProvider,
-        wallet: Account
+        provider: ApiProvider
     ):
         self._provider = provider
-        self.wallet = wallet
+        self.wallet = self._provider.account
         self.logger = logging.getLogger("OrderBook")
 
-        logging.info("Loading OrderBook contract")
+        self.logger.info("Loading OrderBook contract")
         _order_book_meta = self._provider.load_meta("OrderBook")
         self._order_book = self._provider._api.eth.contract(
             address=_order_book_meta["address"],
             abi=_order_book_meta["abi"]
         )
-        logging.info("OrderBook contract loaded")
+        self.logger.info("OrderBook contract loaded")
 
     def get_exchange(self):
         return self._order_book.functions.getExchange().call()
@@ -74,7 +75,7 @@ class OrderBook:
     def has_order(
         self,
         trader: str,
-        tokens: list[str]
+        tokens: List[str]
     ):
         return self._order_book.functions.hasOrder(
             trader,
@@ -84,13 +85,18 @@ class OrderBook:
     def get_total_quote_balance_and_pending_fee(
         self,
         trader: str,
-        base_token: list[str]
+        base_token: List[str]
     ):
         #TODO: return totalQuoteAmountInPool and totalPendingFee in dict
-        return self._order_book.functions.getTotalQuoteBalanceAndPendingFee(
+        resp = self._order_book.functions.getTotalQuoteBalanceAndPendingFee(
             trader,
             base_token
         ).call()
+
+        return {
+            'totalQuoteAmountInPools': resp[0],
+            'totalPendingFee': resp[1]
+        }
 
     def get_total_token_amount_in_pool_and_pending_fee(
         self,
@@ -98,11 +104,16 @@ class OrderBook:
         base_token: str,
         fetch_base: bool
     ):
-        return self._order_book.functions.getTotalTokenAmountInPoolAndPendingFee(
+        resp = self._order_book.functions.getTotalTokenAmountInPoolAndPendingFee(
             trader,
             base_token,
             fetch_base
         ).call()
+
+        return {
+            'tokenAmount': resp[0],
+            'pendingFee': resp[1]
+        }
 
     def get_liquidity_coefficient_in_funding_payment(
         self,

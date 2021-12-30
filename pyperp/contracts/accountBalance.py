@@ -1,35 +1,31 @@
 from pyperp.providers import ApiProvider
+from pyperp.contracts.types import AccountMarketInfo
 from web3 import Web3
+import logging 
 
 class AccountBalance:
     def __init__(self, provider: ApiProvider):
         self._provider = provider
         self.logger = logging.getLogger("AccountBalance")
 
-        logging.info("Loading AccountBalance contract")
+        self.logger.info("Loading AccountBalance contract")
         _account_balance_meta = self._provider.load_meta("AccountBalance")
         self._account_balance = self._provider._api.eth.contract(
             address=_account_balance_meta["address"],
             abi=_account_balance_meta["abi"]
         )
-        logging.info("AccountBalance contract loaded")
+        self.logger.info("AccountBalance contract loaded")
 
     def get_base_tokens(
         self,
-        trader: str,
-        base_token: str
+        trader: str
     ):
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
         )
-        assert(
-            Web3.isAddress(base_token),
-            f"Base Token address {base_token} must be a valid address"
-        )
         return self._account_balance.functions.getBaseTokens(
-            trader,
-            base_token
+            trader
         ).call()
 
     def get_account_info(
@@ -45,10 +41,12 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        return self._account_balance.functions.getAccountInfo(
+        resp = self._account_balance.functions.getAccountInfo(
             trader,
             base_token
         ).call()
+
+        return AccountMarketInfo(*resp)
 
     def get_taker_open_notional(
         self,
@@ -118,9 +116,14 @@ class AccountBalance:
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
         )
-        return self._account_balance.functions.getPnlAndPendingFee(
+        resp = self._account_balance.functions.getPnlAndPendingFee(
             trader
         ).call()
+        return {
+            'owed_realized_pnl': resp[0],
+            'unrealized_pnl': resp[1],
+            'pending_fee': resp[2]
+        }
 
     def has_order(
         self,
@@ -131,6 +134,19 @@ class AccountBalance:
             f"Trader address {trader} must be a valid address"
         )
         return self._account_balance.functions.hasOrder(
+            trader
+        ).call()
+
+    #TODO: update ABI
+    def has_order_in_open_or_closed_market(
+        self,
+        trader: str
+    ):
+        assert(
+            Web3.isAddress(trader),
+            f"Trader address {trader} must be a valid address"
+        )
+        return self._account_balance.functions.hasOrderInOpenOrClosedMarket(
             trader
         ).call()
 
@@ -224,7 +240,7 @@ class AccountBalance:
             base_token
         ).call()
 
-    def get_account_info(
+    def get_total_abs_position_value(
         self,
         trader: str
     ):
@@ -236,6 +252,7 @@ class AccountBalance:
             trader
         ).call()
 
+    #TODO: update ABI
     def settle_pnl_in_closed_market(
         self,
         trader: str,

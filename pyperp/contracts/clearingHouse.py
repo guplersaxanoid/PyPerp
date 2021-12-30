@@ -5,31 +5,43 @@ from pyperp.contracts.types import (
     ClosePositionParams,
     RemoveLiquidityParams
 )
-from pyperp.types import GasParams
+from pyperp.common.types import GasParams
 from web3 import Web3
 from eth_account import Account
+import logging 
+from dataclasses import astuple
 
 class ClearingHouse:
-    def __init__(self, provider: ApiProvider, wallet: Account):
+    def __init__(self, provider: ApiProvider):
         self._provider = provider
-        self.account = account
+        self.account = self._provider.account
         self.logger = logging.getLogger("ClearingHouse")
 
-        logging.info("Loading ClearingHouse contract")
-        _clearing_house_meta = self._provider.load_meta("ClearingHouse")
-        self._clearing_house = self._provider.api.eth.contract(
-            address=_clearing_house_meta["address"],
-            abi=_clearing_house_meta["abi"]
+        self.logger.info("Loading ClearingHouse contract")
+        clearing_house_meta = self._provider.load_meta("ClearingHouse")
+        self.clearing_house = self._provider.api.eth.contract(
+            address=clearing_house_meta["address"],
+            abi=clearing_house_meta["abi"]
         )
-        logging.info("ClearingHouse contract loaded")
+        self.logger.info("ClearingHouse contract loaded")
 
-        logging.info("Loading USDC contract")
-        _USDC_meta = self._provider.load_meta("USDC")
-        self._USDC = self._provider.api.eth.contract(
-            address=_USDC_meta["address"],
-            abi=_USDC_meta["abi"]
+        self.logger.info("Loading USDC contract")
+        usdc_meta = self._provider.load_meta("USDC")
+        self.usdc = self._provider.api.eth.contract(
+            address=usdc_meta["address"],
+            abi=usdc_meta["abi"]
         )
-        logging.info("USDC contract loaded")
+        self.logger.info("USDC contract loaded")
+
+        self.logger.info("Loading vBTC contract")
+        vbtc_meta = self._provider.load_meta("vBTC")
+        self.vbtc = self._provider.api.eth.contract(
+            address=vbtc_meta["address"],
+            abi=vbtc_meta["abi"]
+        )
+        self.logger.info("vBTC contract loaded")
+
+        #TODO: load vETH and approve usage
 
 
     def approve_clearinghouse_to_use_usdc(
@@ -40,34 +52,92 @@ class ClearingHouse:
         nonce = self._provider.api.eth.get_transaction_count(
             self.account.address
         )
-        tx = self._USDC.functions.approve(
-            _clearing_house_meta["address"],
-            2**256-1
-        ).buildTransaction({
-            'nonce': nonce,
-            **gas_params
-        })
 
+        tx_params = {
+            'nonce': nonce,
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.usdc.functions.approve(
+            self.clearing_house.address,
+            2**256-1
+        ).buildTransaction(tx_params)
+
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
+        )
+
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
+        )
+
+        return receipt
+
+    def approve_clearinghouse_to_use_vbtc(
+        self,
+        gas_params: GasParams
+    ):
+        logging.info("Approving ClearingHouse to use vBTC")
+        nonce = self._provider.api.eth.get_transaction_count(
+            self.account.address
+        )
+
+        tx_params = {
+            'nonce': nonce,
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.vbtc.functions.approve(
+            self.clearing_house.address,
+            2**256-1
+        ).buildTransaction(tx_params)
+
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
+        )
+
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
+        )
+
+        return receipt
     
     def add_liquidity(
         self,
         params: AddLiquidityParams,
         gas_params: GasParams
     ):
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.addLiquidity(
-            params.toDict()
-        ).buildTransaction({
-            'nonce': nonce,
-            **gas_params.toDict()
-        })
-
-        signed_tx = self._provider.eth.sign_transaction(
-            tx, self.wallet.key
+        nonce = self._provider.api.eth.get_transaction_count(
+            self.account.address
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
-            signed_tx.rawTransaction
+        tx_params = {
+            'nonce': nonce,
+            **(gas_params.to_dict())
+        }
+
+        tx = self.clearing_house.functions.addLiquidity(
+            params.to_dict()
+        ).buildTransaction(tx_params)
+
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
+        )
+
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
         )
 
         return receipt
@@ -75,23 +145,29 @@ class ClearingHouse:
     def remove_liquidity(
         self,
         params: RemoveLiquidityParams,
-        wallet: Account,
         gas_params: GasParams
     ):
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.removeLiquidity(
-            params.toDict()
-        ).buildTransaction({
+        nonce = self._provider.api.eth.get_transaction_count(self.wallet.address)
+        
+        tx_params = {
             'nonce': nonce,
-            **gas_params.toDict()
-        })
+            **(gas_params.to_dict())
+        }
 
-        signed_tx = self._provider.eth.sign_transaction(
-            tx, self.wallet.key
+        tx = self.clearing_house.functions.removeLiquidity(
+            astuple(params)
+        ).buildTransaction(tx_params)
+
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
-            signed_tx.rawTransaction
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
         )
 
         return receipt
@@ -105,20 +181,27 @@ class ClearingHouse:
             Web3.isAddress(trader),
             f"Trader address {trader} must be an address"    
         )
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.settleAllFunding(
-            trader
-        ).buildTransaction({
+        nonce = self._provider.api.eth.get_transaction_count(self.wallet.address)
+        
+        tx_params = {
             'nonce': nonce,
-            **gas_params.toDict()
-        })
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.clearing_house.functions.settleAllFunding(
+            trader
+        ).buildTransaction(tx_params)
 
-        signed_tx = self._provider.eth.sign_transaction(
-            tx, self.wallet.key
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
+        tx_hash = self._provider.api.eth.send_raw_transaction(
             signed_tx.rawTransaction
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
         )
 
         return receipt
@@ -128,20 +211,29 @@ class ClearingHouse:
         params: OpenPositionParams,
         gas_params: GasParams
     ):
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.openPosition(
-            params.toDict()
-        ).buildTransaction({
+        nonce = self._provider.api.eth.get_transaction_count(
+            self.account.address
+        )
+        
+        tx_params = {
             'nonce': nonce,
-            **gas_params.toDict()
-        })
+            **(gas_params.to_dict())
+        }
 
-        signed_tx = self._provider.eth.sign_transaction(
-            tx, self.wallet.key
+        tx = self.clearing_house.functions.openPosition(
+            astuple(params)
+        ).buildTransaction(tx_params)
+
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
-            signed_tx.rawTransaction
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
         )
 
         return receipt
@@ -151,20 +243,29 @@ class ClearingHouse:
         params: ClosePositionParams,
         gas_params: GasParams
     ):
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.closePosition(
-            params.toDict()
-        ).buildTransaction({
+        nonce = self._provider.api.eth.get_transaction_count(
+            self.account.address
+        )
+        
+        tx_params = {
             'nonce': nonce,
-            **gas_params.toDict()
-        })
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.clearing_house.functions.closePosition(
+            astuple(params)
+        ).buildTransaction(tx_params)
 
-        signed_tx = self._provider.eth.sign_transaction(
-            tx, self.wallet.key
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
-            signed_tx.rawTransaction
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
         )
 
         return receipt
@@ -184,21 +285,28 @@ class ClearingHouse:
             f'Base Token address {base_token} must be a checkcum address'
         )
 
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.liquidate(
+        nonce = self._provider.api.eth.get_transaction_count(self.wallet.address)
+        
+        tx_params = {
+            'nonce': nonce,
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.clearing_house.functions.liquidate(
             trader,
             base_token
-        ).buildTransaction({
-            'nonce': nonce,
-            **gas_params.toDict()
-        })
+        ).buildTransaction(tx_params)
 
-        signed_tx = self._provider.eth.sign_transaction(
-            tx, self.wallet.key
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
-            signed_tx.rawTransaction
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
         )
 
         return receipt
@@ -212,29 +320,38 @@ class ClearingHouse:
         gas_params: GasParams
     ):
         assert(
-            Web3.isAddress(trader),
+            Web3.isAddress(maker),
             f'Maker address {maker} must be a checksum address'
         )
         assert(
             Web3.isAddress(base_token),
-            f'Base Token address {base_token} must be a checkcum address'
+            f'Base Token address {base_token} must be a checksum address'
         )
 
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.cancelAllExcessOrders(
+        nonce = self._provider.api.eth.get_transaction_count(
+            self.account.address
+        )
+        
+        tx_params = {
+            'nonce': nonce,
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.clearing_house.functions.cancelAllExcessOrders(
             maker,
             base_token
-        ).buildTransaction({
-            'nonce': nonce,
-            **gas_params.toDict()
-        })
+        ).buildTransaction(tx_params)
 
-        signed_tx = self._provider.eth.sign_transaction(
-            tx, self.wallet.key
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
-            signed_tx.rawTransaction
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
         )
 
         return receipt
@@ -254,20 +371,28 @@ class ClearingHouse:
             f'Base Token address {base_token} must be a checkcum address'
         )
 
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.closePositionInClosedMarket(
+        nonce = self._provider.api.eth.get_transaction_count(
+            self.account.address
+        )
+        
+        tx_params = {
+            'nonce': nonce,
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.clearing_house.functions.closePositionInClosedMarket(
             trader,
             base_token
         ).buildTransaction({
             'nonce': nonce,
-            **gas_params.toDict()
+            **gas_params.to_dict()
         })
 
-        signed_tx = self._provider.eth.sign_transaction(
+        signed_tx = self._provider.api.eth.sign_transaction(
             tx, self.wallet.key
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
+        receipt = self._provider.api.eth.send_raw_transaction(
             signed_tx.rawTransaction
         )
 
@@ -280,22 +405,31 @@ class ClearingHouse:
         data: str,
         gas_params: GasParams
     ):
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.uninswapV3MintCallback(
+        nonce = self._provider.api.eth.get_transaction_count(
+            self.account.address
+        )
+        
+        tx_params = {
+            'nonce': nonce,
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.clearing_house.functions.uninswapV3MintCallback(
             amount0Owed,
             amount1Owed,
             data
-        ).buildTransaction({
-            'nonce': nonce,
-            **gas_params.toDict()
-        })
+        ).buildTransaction(tx_params)
 
-        signed_tx = self._provider.eth.sign_transaction(
-            tx, self.wallet.key
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
-            signed_tx.rawTransaction
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
         )
 
         return receipt
@@ -307,52 +441,61 @@ class ClearingHouse:
         data: str,
         gas_params: GasParams
     ):
-        nonce = self._provider.eth.get_transaction_count(self.wallet.address)
-        tx = self._clearing_house.functions.uninswapV3SwapCallback(
+        nonce = self._provider.api.eth.get_transaction_count(
+            self.account.address
+        )
+        
+        tx_params = {
+            'nonce': nonce,
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.clearing_house.functions.uninswapV3SwapCallback(
             amount0Delta,
             amount1Delta,
             data
-        ).buildTransaction({
-            'nonce': nonce,
-            **gas_params.toDict()
-        })
+        ).buildTransaction(tx_params)
 
-        signed_tx = self._provider.eth.sign_transaction(
-            tx, self.wallet.key
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
         )
 
-        receipt = self._provider.eth.send_raw_transaction(
+        tx_hash = self._provider.api.eth.send_raw_transaction(
             signed_tx.rawTransaction
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
         )
 
         return receipt
 
     def get_quote_token(self):
-        return self._clearing_house.functions.getQuoteToken(
+        return self.clearing_house.functions.getQuoteToken(
         ).call()
 
     def get_uniswap_v3_factory(self):
-        return self._clearing_house.functions.getUniswapV3Factory(
+        return self.clearing_house.functions.getUniswapV3Factory(
         ).call()
 
-    def get_clearing_house_config(self):
-        return self._clearing_house.functions.getClearingHouseConfig(
+    def getclearing_house_config(self):
+        return self.clearing_house.functions.getClearingHouseConfig(
         ).call()
     
     def get_vault(self):
-        return self._clearing_house.functions.getVault().call()
+        return self.clearing_house.functions.getVault().call()
 
     def get_exchange(self):
-        return self._clearing_house.functions.getExchange().call()
+        return self.clearing_house.functions.getExchange().call()
 
     def get_order_book(self):
-        return self._clearing_house.functions.getOrderBook().call()
+        return self.clearing_house.functions.getOrderBook().call()
 
     def get_account_balance(self):
-        return self._clearing_house.functions.getAccountBalance().call()
+        return self.clearing_house.functions.getAccountBalance().call()
 
     def get_insurance_fund(self):
-        return self._clearing_house.functions.getInsuraceFund().call()
+        return self.clearing_house.functions.getInsuraceFund().call()
 
     def get_account_value(
         self,
@@ -362,4 +505,4 @@ class ClearingHouse:
             Web3.isAddress(trader),
             f'trader address {trader} must be a checksum address'
         )
-        return self._clearing_house.functions.getAccountValue(trader).call()
+        return self.clearing_house.functions.getAccountValue(trader).call()

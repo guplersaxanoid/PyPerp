@@ -9,20 +9,19 @@ from pyperp.types import (
 class Vault:
     def __init__(
         self,
-        provider: ApiProvider,
-        wallet: Account
+        provider: ApiProvider
     ):
-        self.provider = provider
-        self.wallet = wallet
+        self._provider = provider
+        self.account = self._provider.account
         self.logger = logging.logger("Vault")
         
-        logging.info("Loading Vault contract")
+        self.logger.info("Loading Vault contract")
         _vault_meta = self._provider.load_meta("Vault")
         self._vault = self._provider._api.eth.contract(
             address=_vault_meta["address"],
             abi=_vault_meta["abi"]
         )
-        logging.info("Vault contract loaded")
+        self.logger.info("Vault contract loaded")
 
     def deposit(
         self,
