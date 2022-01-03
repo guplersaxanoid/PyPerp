@@ -1,10 +1,20 @@
+'''AccountBalance Class'''
+
 from pyperp.providers import ApiProvider
 from pyperp.contracts.types import AccountMarketInfo
 from web3 import Web3
 import logging 
 
 class AccountBalance:
+    '''
+    Interface with AccountBalance contract.
+    '''
     def __init__(self, provider: ApiProvider):
+        '''
+        Intialize Provider.
+        Argument:
+        provider - An object of class derived from ApiProvider.
+        '''
         self._provider = provider
         self.logger = logging.getLogger("AccountBalance")
 
@@ -20,6 +30,12 @@ class AccountBalance:
         self,
         trader: str
     ):
+        '''
+        Get base tokens owned by trader.
+        Arguments:
+        trader - wallet address of trader
+        Returns a list of base token addresses
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -33,6 +49,13 @@ class AccountBalance:
         trader: str,
         base_token: str
     ):
+        '''
+        Get Account Info of trader for a base token;
+        Arguments:
+        trader - wallet address of trader
+        base_token - contract address of base token
+        Returns an AccountMarketInfo object
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -53,6 +76,13 @@ class AccountBalance:
         trader: str,
         base_token: str
     ):
+        '''
+        Get Taker Open Notional value
+        Arguments:
+        trader - wallet address of trader
+        base_token - contract address of base token
+        Returns taker open notional value
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -71,6 +101,13 @@ class AccountBalance:
         trader: str,
         base_token: str
     ):
+        '''
+        Get Total Open Notional value
+        Arguments:
+        trader - wallet address of trader
+        base_token - contract address of base token
+        Returns total open notional value
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -88,6 +125,12 @@ class AccountBalance:
         self,
         trader: str,
     ):
+        '''
+        Get total debt value
+        Arguments:
+        trader - wallet address of trader
+        Returns total debt value
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -100,6 +143,12 @@ class AccountBalance:
         self,
         trader: str
     ):
+        '''
+        Get marginal requirement for liquidation
+        Arguments:
+        trader - wallet address of trader
+        Returns marginal requirement for liquidation
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -112,6 +161,15 @@ class AccountBalance:
         self,
         trader: str,
     ):
+        '''
+        Get Pnl value and Pending fee
+        Arguments:
+        trader - wallet address of trader
+        Returns a dict with the followig keys:
+        owed_realized_pnl - Owed Realized Pnl value
+        unrealized_pnl - Unrealized pnl value
+        pending_fee - Pending fee
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -129,6 +187,14 @@ class AccountBalance:
         self,
         trader: str
     ):
+        '''
+        Check if a trader has any orders
+        Arguments:
+        trader - wallet address of trader
+        Returns:
+        True - if trader has order
+        False - if trader doesn't have any order
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -142,6 +208,14 @@ class AccountBalance:
         self,
         trader: str
     ):
+        '''
+        Check if a trader has any orders in open or closed markets
+        Arguments:
+        trader - wallet address of trader
+        Returns:
+        True - if trader has order
+        False - if trader doesn't have any order
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -155,6 +229,12 @@ class AccountBalance:
         trader: str,
         base_token: str
     ):
+        '''
+        Get position size of a base token in terms of base
+        Arguments:
+        trader - wallet address of trader
+        base_token - address of base token
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -173,6 +253,12 @@ class AccountBalance:
         trader: str,
         base_token: str
     ):
+        '''
+        Get position size of a base token in terms of quote
+        Arguments:
+        trader - wallet address of trader
+        base_token - address of base token
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -191,6 +277,12 @@ class AccountBalance:
         trader: str,
         base_token: str
     ):
+        '''
+        Get taker position size of a base token
+        Arguments:
+        trader - wallet address of trader
+        base_token - address of base token
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -209,6 +301,12 @@ class AccountBalance:
         trader: str,
         base_token: str
     ):
+        '''
+        Get total position size of a base token
+        Arguments:
+        trader - wallet address of trader
+        base_token - address of base token
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -227,6 +325,12 @@ class AccountBalance:
         trader: str,
         base_token: str
     ):
+        '''
+        Get total position value of a base token
+        Arguments:
+        trader - wallet address of trader
+        base_token - address of base token
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -244,6 +348,11 @@ class AccountBalance:
         self,
         trader: str
     ):
+        '''
+        Get total absolute position value
+        Arguments:
+        trader - wallet address of trader
+        '''      
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
@@ -258,6 +367,12 @@ class AccountBalance:
         trader: str,
         base_token: str
     ):
+        '''
+        Settle PNL in closed market
+        Arguments:
+        trader - wallet address of trader
+        base_token - address of base token 
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"

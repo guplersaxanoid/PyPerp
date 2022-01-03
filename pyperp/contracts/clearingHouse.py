@@ -1,3 +1,5 @@
+'''ClearingHouse class.'''
+
 from pyperp.providers import ApiProvider
 from pyperp.contracts.types import (
     AddLiquidityParams,
@@ -13,6 +15,11 @@ from dataclasses import astuple
 
 class ClearingHouse:
     def __init__(self, provider: ApiProvider):
+        '''
+        Initialize provider.
+        Arguments:
+        provider - An object of class derived from ApiProvider
+        '''
         self._provider = provider
         self.account = self._provider.account
         self.logger = logging.getLogger("ClearingHouse")
@@ -41,13 +48,25 @@ class ClearingHouse:
         )
         self.logger.info("vBTC contract loaded")
 
-        #TODO: load vETH and approve usage
+        self.logger.info("Loading vETH contract")
+        veth_meta = self._provider.load_meta("vETH")
+        self.veth = self._provider.api.eth.contract(
+            address=veth_meta["address"],
+            abi=veth_meta["abi"]
+        )
+        self.logger.info("vETH contract loaded")
+
 
 
     def approve_clearinghouse_to_use_usdc(
         self,
         gas_params: GasParams
     ):
+        '''
+        Approve ClearingHouse contract to use USDC
+        Arguments:
+        gas_params: GasParams object
+        '''
         logging.info("Approving ClearingHouse to use USDC")
         nonce = self._provider.api.eth.get_transaction_count(
             self.account.address
@@ -81,6 +100,11 @@ class ClearingHouse:
         self,
         gas_params: GasParams
     ):
+        '''
+        Approve ClearingHouse contract to use vBTC
+        Arguments:
+        gas_params - GasParams object
+        '''
         logging.info("Approving ClearingHouse to use vBTC")
         nonce = self._provider.api.eth.get_transaction_count(
             self.account.address
@@ -109,12 +133,56 @@ class ClearingHouse:
         )
 
         return receipt
+
+    def approve_clearinghouse_to_use_veth(
+        self,
+        gas_params: GasParams
+    ):
+        '''
+        Approve ClearingHouse contract to use vETH
+        Arguments:
+        gas_params - GasParams object
+        '''
+        logging.info("Approving ClearingHouse to use vETH")
+        nonce = self._provider.api.eth.get_transaction_count(
+            self.account.address
+        )
+
+        tx_params = {
+            'nonce': nonce,
+            **(gas_params.to_dict())
+        }
+        
+        tx = self.veth.functions.approve(
+            self.clearing_house.address,
+            2**256-1
+        ).buildTransaction(tx_params)
+
+        signed_tx = self._provider.api.eth.account.sign_transaction(
+            tx, self.account.key.hex()
+        )
+
+        tx_hash = self._provider.api.eth.send_raw_transaction(
+            signed_tx.rawTransaction.hex()
+        )
+
+        receipt = self._provider.api.eth.wait_for_transaction_receipt(
+            tx_hash
+        )
+
+        return receipt
     
     def add_liquidity(
         self,
         params: AddLiquidityParams,
         gas_params: GasParams
     ):
+        '''
+        Add Liquidity
+        Arguments:
+        params - AddLiquidityParams object
+        gas_params - GasParams object
+        '''
         nonce = self._provider.api.eth.get_transaction_count(
             self.account.address
         )
@@ -147,6 +215,12 @@ class ClearingHouse:
         params: RemoveLiquidityParams,
         gas_params: GasParams
     ):
+        '''
+        Remove Liquidity
+        Arguments:
+        params - RemoveLiquidityParams object
+        gas_params - GasParams object
+        '''
         nonce = self._provider.api.eth.get_transaction_count(self.wallet.address)
         
         tx_params = {
@@ -177,6 +251,12 @@ class ClearingHouse:
         trader: str,
         gas_params: GasParams
     ):
+        '''
+        Settle All Funding
+        Arguments:
+        trader - wallet address of trader
+        gas_params - GasParams object
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be an address"    
@@ -211,6 +291,12 @@ class ClearingHouse:
         params: OpenPositionParams,
         gas_params: GasParams
     ):
+        '''
+        Open Position
+        Arguments:
+        params - OpenPositionParams object
+        gas_params - GasParams object
+        '''
         nonce = self._provider.api.eth.get_transaction_count(
             self.account.address
         )
@@ -243,6 +329,12 @@ class ClearingHouse:
         params: ClosePositionParams,
         gas_params: GasParams
     ):
+        '''
+        Close Position
+        Arguments:
+        params - ClosePositionParams object
+        gas_params - GasParams object
+        '''
         nonce = self._provider.api.eth.get_transaction_count(
             self.account.address
         )
@@ -276,6 +368,13 @@ class ClearingHouse:
         base_token: str,
         gas_params: GasParams
     ):
+        '''
+        Liquidate
+        Arguments:
+        trader - wallet address of trader
+        base_token - contract address of base token
+        gas_params - GasParams object
+        '''
         assert(
             Web3.isAddress(trader),
             f'trader address {trader} must be a checksum address'
@@ -319,6 +418,13 @@ class ClearingHouse:
         base_token: str,
         gas_params: GasParams
     ):
+        '''
+        Cancel All Excess Orders
+        Arguments:
+        maker - wallet address of maker
+        base_token - contract address of base token
+        gas_params - GasParams object
+        '''
         assert(
             Web3.isAddress(maker),
             f'Maker address {maker} must be a checksum address'
@@ -362,6 +468,13 @@ class ClearingHouse:
         base_token: str,
         gas_params: GasParams
     ):
+        '''
+        Close Position in Closed Market
+        Arguments:
+        trader - wallet address of trader
+        base_token - contract address of base token
+        gas_params - GasParams object
+        '''
         assert(
             Web3.isAddress(trader),
             f'trader address {trader} must be a checksum address'
@@ -405,6 +518,9 @@ class ClearingHouse:
         data: str,
         gas_params: GasParams
     ):
+        '''
+        Uniswap V3 mint callback.
+        '''
         nonce = self._provider.api.eth.get_transaction_count(
             self.account.address
         )
@@ -434,13 +550,16 @@ class ClearingHouse:
 
         return receipt
 
-    def uniswap_v3_mint_callback(
+    def uniswap_v3_swap_callback(
         self,
         amount0Delta: int,
         amount1Delta: int,
         data: str,
         gas_params: GasParams
     ):
+        '''
+        Uniswap V3 Swap Callback.
+        '''
         nonce = self._provider.api.eth.get_transaction_count(
             self.account.address
         )
@@ -471,36 +590,65 @@ class ClearingHouse:
         return receipt
 
     def get_quote_token(self):
+        '''
+        Returns address of quote token contract.
+        '''
         return self.clearing_house.functions.getQuoteToken(
         ).call()
 
     def get_uniswap_v3_factory(self):
+        '''
+        Returns address of UniswapV3Factory contracy.
+        '''
         return self.clearing_house.functions.getUniswapV3Factory(
         ).call()
 
-    def getclearing_house_config(self):
+    def get_clearing_house_config(self):
+        '''
+        Returns address of ClearingHouseConfig contract.
+        '''
         return self.clearing_house.functions.getClearingHouseConfig(
         ).call()
     
     def get_vault(self):
+        '''
+        Returns address of Vault contract.
+        '''
         return self.clearing_house.functions.getVault().call()
 
     def get_exchange(self):
+        '''
+        Returns address of Exchange contract.
+        '''
         return self.clearing_house.functions.getExchange().call()
 
     def get_order_book(self):
+        '''
+        Returns address of OrderBook contract.
+        '''
         return self.clearing_house.functions.getOrderBook().call()
 
     def get_account_balance(self):
+        '''
+        Returns address of AccountBalance contract.
+        '''
         return self.clearing_house.functions.getAccountBalance().call()
 
     def get_insurance_fund(self):
+        '''
+        Returns address of InsuranceFund contract.
+        '''
         return self.clearing_house.functions.getInsuraceFund().call()
 
     def get_account_value(
         self,
         trader: str
     ):
+        '''
+        Returns account value.
+        Arguments:
+        trader - wallet address of trader.
+        '''
         assert(
             Web3.isAddress(trader),
             f'trader address {trader} must be a checksum address'

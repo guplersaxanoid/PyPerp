@@ -1,3 +1,5 @@
+'''MarketRegistry Class.'''
+
 from pyperp.providers import ApiProvider
 from pyperp.contracts.types import (
     MarketInfo
@@ -10,6 +12,11 @@ class MarketRegistry:
         self,
         provider: ApiProvider
     ):
+        '''
+        Initialize provider.
+        Arguments:
+        provider - an object of classes derived from ApiProvider
+        '''
         self._provider = provider
         self.logger = logging.getLogger("MarketRegistry")
 
@@ -24,12 +31,21 @@ class MarketRegistry:
         self.logger.info("MarketRegistry Contract Loaded")
 
     def get_quote_token(self):
+        '''
+        Returns address of quote token contract.
+        '''
         return self._market_registry.functions.getQuoteToken().call()
 
     def get_uniswap_v3_factory(self):
+        '''
+        Returns address of UniswapV3Factory contract.
+        '''
         return self._market_registry.functions.getUniswapV3Factory().call()
 
     def get_max_orders_per_market(self):
+        '''
+        Returns maximum orders per market.
+        '''
         return self._market_registry.functions.getMaxOrdersPerMarket(
         ).call()
 
@@ -37,6 +53,11 @@ class MarketRegistry:
         self,
         base_token: str
     ):
+        '''
+        Returns pool address of a base token.
+        Arguments:
+        base_token - contract address of base token
+        '''
         return self._market_registry.functions.getPool(
             base_token
         ).call()
@@ -45,6 +66,11 @@ class MarketRegistry:
         self,
         base_token: str
     ):
+        '''
+        Returns fee ratio for a base token.
+        Argments:
+        base_token - contract address of base token
+        '''
         return self._market_registry.functions.getFeeRatio(
             base_token
         ).call()
@@ -53,6 +79,11 @@ class MarketRegistry:
         self,
         base_token: str
     ):
+        '''
+        Returns insurance fund fee ratio for a base token.
+        Arguments:
+        base_token - contract address of base token
+        '''
         return self._market_registry.functions.getInsuranceFundFeeRatio(
             base_token
         ).call()
@@ -61,6 +92,11 @@ class MarketRegistry:
         self,
         base_token: str
     ):
+        '''
+        Returns Market Info for a base token.
+        Arguments:
+        base_token - contract address of base token
+        '''
         resp = self._market_registry.functions.getMarketInfo(
             base_token
         ).call()
