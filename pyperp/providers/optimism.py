@@ -1,3 +1,5 @@
+'''OptimismProvider class'''
+
 from pyperp.providers import ApiProvider
 from eth_account import Account
 class OptimismProvider(ApiProvider):
