@@ -115,10 +115,6 @@ class OpenOrderInfo:
     last_tw_premium_div_by_sqrt_price_growth_inside_x96: int
     base_debt: int
     quote_debt: int
-
-    def from_tuple(self, t):
-        #TODO: implement field looping
-        return
     
     def to_dict(self):
         return {
