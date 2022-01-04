@@ -1,6 +1,6 @@
 # PyPerp
 
-A python SDK for [Perpetual Protocol](https://github.com/perpetual-protocol/perpetual-protocol). 
+A python SDK for Perpetual Protocol. 
 
 ## Installation
 
@@ -10,129 +10,130 @@ From PyPi:
 
 ## Documentation
 
-The complete documentation can be found [here](https://velnaveen99.gitbook.io/pyperp/)
+The complete documentation will be added soon
 
 ## Example Code
 
-This example code is written to demonstrate simple trading on the testnet.
+This example code is written to demonstrate simple trading on Optimism Kovan.
 
-1.) creating a Trader object
-
-```
-from web3 import Web3
-from web3.middleware import geth_poa_middleware
-from pyperp import Trader, Providers
-
-l2provider = Web3(Web3.HTTPProvider("https://rpc.xdaichain.com/"))
-l1provider = Web3(Web3.HTTPProvider("https://rinkeby.infura.io/v3/YOUR_PROJECT_ID_HERE"))
-l1provider.middleware_onion.inject(geth_poa_middleware, layer=0) #rinkeby used poa
-provider = Providers(l1provider,l2provider,True) #The third argument specifies whether the providers are in testnet or mainnet. True means testnet, False means Mainnet
-
-l1wallet = provider.l1.eth.account.privateKeyToAccount("PRIVATE_KEY_HERE")
-l2wallet = provider.l2.eth.account.privateKeyToAccount("PRIVATE_KEY_HERE")
-
-trader = Trader(provider, l1wallet, l2wallet)
-```
-
-2.) using the USDC faucet in rinkeby
+### Create an ApiProvider object
 
 ```
-from pyperp import Faucets
+from eth_account import Account
+from pyperp.providers import OptimismKovanProvider
 
-response = Faucets.get_usdc_l1(trader.layer1wallet.address)
-print(response)
+account = Account.from_key('<PRIVATE_KEY_HERE>')
+provider = OptimismKovanProvider(
+  '<RPC_ENDPOINT_URL>',
+  account
+)
 ```
 
-This USDC faucet is hosted by the Perpetual Protocol team, and it can be used only once per address. 
-
-3.) moving USDC from layer1 to layer2
-
-allow layer1 bridge to use your USDC funds if not done already
+### Approve Vault to use USDC
 
 ```
-receipt = trader.approve_l1_bridge_to_use_usdc({"GasPrice":<gas price>, "GasLimit":<gas limit>})
-print(receipt)
+from pyperp.contracts import Vault
+from pyperp.common.types import GasParams
+
+gas_params = GasParams(
+  gas=1000000,
+  gas_price=100000
+)
+
+vault = Vault(provider)
+
+receipt = vault.approve_vault_to_use_usdc(
+  gas_params
+)
 ```
 
-Then, call `depositUsdcToXdai()`
-```
-receipt = trader.deposit_usdc_to_xdai(100,{"GasPrice":<gas price>, "GasLimit":<gas limit>}) #move 100 USDC to xDai 
-```
+### deposit USDC to vault
 
-4.) open a position 
-
-allow ClearingHouse contract to use the USDC in your xDai if not done already. 
 
 ```
-receipt = trader.approve_clearing_house_to_use_usdc({"GasPrice":<gas price>, "GasLimit":<gas limit>})
-print(receipt)
+receipt = vault.deposit(
+  vault.usdc.address,
+  10000000000,
+  gas_params
+)
 ```
 
-Open a position with a pair of your choice using the openPosition() method in Trader class. Here, the ETH/USDC pair is used
+Vault.deposit() takes the following positional arguments:
+
+token: contract address of collateral token
+
+amount: amount of token to deposit
+
+gas_params: GasParams object denoting gas paramateres.
+
+### check how much collateral can be withdrawn
 
 ```
-from pyperp import constants
-
-receipt = trader.open_position("ETHUSDC",constants.Side.SHORT.value,100,2,0,{"GasPrice":<gas price>, "GasLimit":<gas limit>})
-print(receipt)
+print(
+  vault.get_free_collateral(
+    account.address
+  )
+)
 ```
 
-the open_position() function takes the following parameters:
-1. The pair: the pair has to chosen from the available pairs in `AvailableAmms` dict in `constants.py` file
-2. side: Has to be either constants.Side.LONG.value (0) or constants.Side.SHORT.value (1) 
-3. quote_asset_amount
-4. leverage
-5. base_asset_amount_aimit
-
-
-5.) get position information 
+### withdraw from vault
 
 ```
-print(trader.get_personal_position_with_funding_payment("ETHUSDC"))
-print(trader.get_unrealized_pnl("ETHUSDC",constants.PnlCalcOption.SPOT_PRICE))
+receipt = vault.withdraw(
+  vault.usdc.address,
+  <AMOUNT_HERE>,
+  gas_params
+)
 ```
 
-The second parameter of the get_unrealized_pnl function is the PnlCalcOption which can be any of these three values : constants.PnlCalcOption.SPOT_PRICE(0), constants.PnlCalcOption.TWAP(1), constants.PnlCalcOption.ORACLE(2)
+### open a position 
 
-6.) add margin to position:
 
-```
-receipt = trader.add_margin("ETHUSDC", 10, {"GasPrice":<gas price>, "GasLimit":<gas limit>})
-print(receipt)
-```
-
-7.) remove margin:
+You can open a position for either vBTC or vETH. In this example we will open a position for vBTC
 
 ```
-receipt = trader.remove_margin("ETHUSDC", 10, {"GasPrice":<gas price>, "GasLimit":<gas limit>})
-print(receipt)
+from pyperp.contracts import ClearingHouse
+from pyperp.contracts.types import OpenPositionParams
+from pyperp.commom.utils import getDeadline
+
+clearing_house = ClearingHouse(provider)
+
+params = OpenPositionParams(
+  base_token = clearing_house.vbtc.address,
+  is_base_to_quote = True,
+  is_exact_input = True,
+  amount = int(0.002*10**18),
+  opposite_amount_bound = 0,
+  deadline = getDeadline(120), #deadline is 120 secs from now
+  sqrt_price_limit_x96 = 0
+)
+
+receipt = clearing_house.open_position(
+  params, gas_params
+)
 ```
 
-8.) close a position:
+### get account value 
 
 ```
-receipt = trader.close_position("ETHUSDC",0, {"GasPrice":<gas price>, "GasLimit":<gas limit>}) #the second parameter is quote asset amount limit
-print(receipt)
+print(
+  clearing_house.get_account_value(account.address)
+)
 ```
 
-9.) withdrawing USDC to L1
-
-allow Layer 2 Bridge to use the USDC if not done already
+### Close Position 
 
 ```
-reciept = trader.approve_l2_bridge_to_use_usdc({"GasPrice":<gas price>, "GasLimit":<gas limit>})
-print(receipt)
+from pyperp.contract.types import ClosePositionParams
+
+params = ClosePositionParams(
+  base_token=clearing_house.vbtc.address,
+  sqrt_price_limit_x96=0,
+  oppposite_amount_bound=0,
+  deadline=getDeadline(120)
+)
+
+receipt = clearing_house.close_position(
+  params, gas_params
+)
 ```
-
-then, withdraw USDC to L1 using `withdraw_usdc_to_ethereum()` function in `Trader` class
-
-```
-receipt = trader.withdraw_usdc_to_ethereum(100,{"GasPrice":<gas price>, "GasLimit":<gas limit>})
-print(receipt)
-```
-
-
-
-
-
-
