@@ -120,10 +120,6 @@ class OpenOrderInfo:
     base_debt: int
     quote_debt: int
 
-    def from_tuple(self, t):
-        # TODO: implement field looping
-        return
-
     def to_dict(self):
         return {
             'liquidity': self.liquidity,
