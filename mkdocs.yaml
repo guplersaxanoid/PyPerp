@@ -1,5 +1,5 @@
 site_name: PyPerp
-site_url: https://example.org
+site_url: https://pyperp.readthedocs.io/en/latest/
 nav:
     - Introduction: index.md
     - Quickstart: quickstart.md
