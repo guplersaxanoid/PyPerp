@@ -1,7 +1,6 @@
 '''OrderBook class.'''
 
 from pyperp.providers import ApiProvider
-from eth_account import Account
 from web3 import Web3
 from pyperp.contracts.types import (
     OpenOrderInfo,
@@ -10,6 +9,7 @@ from pyperp.contracts.types import (
 from typing import List
 import logging
 from hexbytes import HexBytes
+
 
 class OrderBook:
     def __init__(
@@ -26,10 +26,10 @@ class OrderBook:
         self.logger = logging.getLogger("OrderBook")
 
         self.logger.info("Loading OrderBook contract")
-        _order_book_meta = self._provider.load_meta("OrderBook")
-        self._order_book = self._provider._api.eth.contract(
-            address=_order_book_meta["address"],
-            abi=_order_book_meta["abi"]
+        order_book_meta = self._provider.load_meta("OrderBook")
+        self.order_book = self._provider._api.eth.contract(
+            address=order_book_meta["address"],
+            abi=order_book_meta["abi"]
         )
         self.logger.info("OrderBook contract loaded")
 
@@ -37,7 +37,7 @@ class OrderBook:
         '''
         Return address of Exchange Contract
         '''
-        return self._order_book.functions.getExchange().call()
+        return self.order_book.functions.getExchange().call()
 
     def get_open_order_ids(
         self,
@@ -59,26 +59,26 @@ class OrderBook:
             f"Base Token address {base_token} must be a checksum address"
         )
 
-        return self._order_book.functions.getOpenOrderIds(
+        return self.order_book.functions.getOpenOrderIds(
             trader,
             base_token
         ).call()
 
     def get_open_order_by_id(
         self,
-        orderId: HexBytes
+        order_id: HexBytes
     ):
         '''
         Returns OpenOrderInfo for an order id.
         Arguments:
         orderId - HexBytes object representing order id.
         '''
-        resp = self._order_book.functions.getOpenOrderById(
-            orderId
+        resp = self.order_book.functions.getOpenOrderById(
+            order_id
         ).call()
         return OpenOrderInfo.from_tuple(resp)
 
-    def getOpenOrder(
+    def get_open_order(
         self,
         trader: str,
         base_token: str,
@@ -90,10 +90,10 @@ class OrderBook:
         Arguments:
         trader - wallet address of a trader
         base_token - contract address of a base token
-        lower_tick - lower tick 
+        lower_tick - lower tick
         upper_tick - upper tick
         '''
-        resp = self._order_book.functions.getOpenOrder(
+        resp = self.order_book.functions.getOpenOrder(
             trader,
             base_token,
             lower_tick,
@@ -112,7 +112,7 @@ class OrderBook:
         trader - wallet address of a trader
         tokens - list of token addresses
         '''
-        return self._order_book.functions.hasOrder(
+        return self.order_book.functions.hasOrder(
             trader,
             tokens
         ).call()
@@ -128,14 +128,14 @@ class OrderBook:
         trader - wallet address of trader
         base_token - contract address of token
         '''
-        resp = self._order_book.functions.getTotalQuoteBalanceAndPendingFee(
+        resp = self.order_book.functions.getTotalQuoteBalanceAndPendingFee(
             trader,
             base_token
         ).call()
 
         return {
-            'totalQuoteAmountInPools': resp[0],
-            'totalPendingFee': resp[1]
+            'total_quote_amount_in_pools': resp[0],
+            'total_pending_fee': resp[1]
         }
 
     def get_total_token_amount_in_pool_and_pending_fee(
@@ -151,15 +151,15 @@ class OrderBook:
         base_token - contract address of base token
         fetch_base - fetch base
         '''
-        resp = self._order_book.functions.getTotalTokenAmountInPoolAndPendingFee(
+        resp = self.order_book.functions.getTotalTokenAmountInPoolAndPendingFee(
             trader,
             base_token,
             fetch_base
         ).call()
 
         return {
-            'tokenAmount': resp[0],
-            'pendingFee': resp[1]
+            'token_amount': resp[0],
+            'pending_fee': resp[1]
         }
 
     def get_liquidity_coefficient_in_funding_payment(
@@ -175,7 +175,7 @@ class OrderBook:
         base_token - contract address of base token
         funding_growth_global - FundingGrowth object
         '''
-        return self._order_book.functions.getLiquidityCoefficientInFundingPayment(
+        return self.order_book.functions.getLiquidityCoefficientInFundingPayment(
             trader,
             base_token,
             funding_growth_global.to_dict()
@@ -196,7 +196,7 @@ class OrderBook:
         lower_tick - lower tick
         upper_tick - upper tick
         '''
-        return self._order_book.functions.getPendingFee(
+        return self.order_book.functions.getPendingFee(
             trader,
             base_token,
             lower_tick,
@@ -216,7 +216,7 @@ class OrderBook:
         base_token - contract address of base token
         fetch_base - fetch base
         '''
-        return self._order_book.functions.getTotalOrderDebt(
+        return self.order_book.functions.getTotalOrderDebt(
             trader,
             base_token,
             fetch_base

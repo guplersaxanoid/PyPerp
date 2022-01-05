@@ -3,10 +3,11 @@
 from pyperp.providers import ApiProvider
 from eth_account import Account
 
+
 class ArbitrumRinkebyProvider(ApiProvider):
-    
+
     def __init__(
-        self, 
+        self,
         endpoint: str,
         account: Account
     ):

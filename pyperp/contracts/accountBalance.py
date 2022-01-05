@@ -3,12 +3,14 @@
 from pyperp.providers import ApiProvider
 from pyperp.contracts.types import AccountMarketInfo
 from web3 import Web3
-import logging 
+import logging
+
 
 class AccountBalance:
     '''
     Interface with AccountBalance contract.
     '''
+
     def __init__(self, provider: ApiProvider):
         '''
         Intialize Provider.
@@ -19,10 +21,10 @@ class AccountBalance:
         self.logger = logging.getLogger("AccountBalance")
 
         self.logger.info("Loading AccountBalance contract")
-        _account_balance_meta = self._provider.load_meta("AccountBalance")
-        self._account_balance = self._provider._api.eth.contract(
-            address=_account_balance_meta["address"],
-            abi=_account_balance_meta["abi"]
+        account_balance_meta = self._provider.load_meta("AccountBalance")
+        self.account_balance = self._provider._api.eth.contract(
+            address=account_balance_meta["address"],
+            abi=account_balance_meta["abi"]
         )
         self.logger.info("AccountBalance contract loaded")
 
@@ -40,7 +42,7 @@ class AccountBalance:
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
         )
-        return self._account_balance.functions.getBaseTokens(
+        return self.account_balance.functions.getBaseTokens(
             trader
         ).call()
 
@@ -64,7 +66,7 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        resp = self._account_balance.functions.getAccountInfo(
+        resp = self.account_balance.functions.getAccountInfo(
             trader,
             base_token
         ).call()
@@ -91,11 +93,11 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        return self._account_balance.functions.getTakerOpenNotional(
+        return self.account_balance.functions.getTakerOpenNotional(
             trader,
             base_token
         ).call()
-        
+
     def get_total_open_notional(
         self,
         trader: str,
@@ -116,7 +118,7 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        return self._account_balance.functions.getTotalOpenNotional(
+        return self.account_balance.functions.getTotalOpenNotional(
             trader,
             base_token
         ).call()
@@ -135,7 +137,7 @@ class AccountBalance:
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
         )
-        return self._account_balance.functions.getTotalDebtValue(
+        return self.account_balance.functions.getTotalDebtValue(
             trader
         ).call()
 
@@ -153,7 +155,7 @@ class AccountBalance:
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
         )
-        return self._account_balance.functions.getMarginRequirementForLiquidation(
+        return self.account_balance.functions.getMarginRequirementForLiquidation(
             trader,
         ).call()
 
@@ -174,7 +176,7 @@ class AccountBalance:
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
         )
-        resp = self._account_balance.functions.getPnlAndPendingFee(
+        resp = self.account_balance.functions.getPnlAndPendingFee(
             trader
         ).call()
         return {
@@ -199,11 +201,11 @@ class AccountBalance:
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
         )
-        return self._account_balance.functions.hasOrder(
+        return self.account_balance.functions.hasOrder(
             trader
         ).call()
 
-    #TODO: update ABI
+    # TODO: update ABI
     def has_order_in_open_or_closed_market(
         self,
         trader: str
@@ -220,7 +222,7 @@ class AccountBalance:
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
         )
-        return self._account_balance.functions.hasOrderInOpenOrClosedMarket(
+        return self.account_balance.functions.hasOrderInOpenOrClosedMarket(
             trader
         ).call()
 
@@ -243,7 +245,7 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        return self._account_balance.functions.getBase(
+        return self.account_balance.functions.getBase(
             trader,
             base_token
         ).call()
@@ -267,7 +269,7 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        return self._account_balance.functions.getQuote(
+        return self.account_balance.functions.getQuote(
             trader,
             base_token
         ).call()
@@ -291,7 +293,7 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        return self._account_balance.functions.getTakerPositionSize(
+        return self.account_balance.functions.getTakerPositionSize(
             trader,
             base_token
         ).call()
@@ -315,7 +317,7 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        return self._account_balance.functions.getTotalPositionSize(
+        return self.account_balance.functions.getTotalPositionSize(
             trader,
             base_token
         ).call()
@@ -339,7 +341,7 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        return self._account_balance.functions.getTotalPositionValue(
+        return self.account_balance.functions.getTotalPositionValue(
             trader,
             base_token
         ).call()
@@ -352,16 +354,16 @@ class AccountBalance:
         Get total absolute position value
         Arguments:
         trader - wallet address of trader
-        '''      
+        '''
         assert(
             Web3.isAddress(trader),
             f"Trader address {trader} must be a valid address"
         )
-        return self._account_balance.functions.getTotalAbsPositionValue(
+        return self.account_balance.functions.getTotalAbsPositionValue(
             trader
         ).call()
 
-    #TODO: update ABI
+    # TODO: update ABI
     def settle_pnl_in_closed_market(
         self,
         trader: str,
@@ -371,7 +373,7 @@ class AccountBalance:
         Settle PNL in closed market
         Arguments:
         trader - wallet address of trader
-        base_token - address of base token 
+        base_token - address of base token
         '''
         assert(
             Web3.isAddress(trader),
@@ -381,7 +383,7 @@ class AccountBalance:
             Web3.isAddress(base_token),
             f"Base Token address {base_token} must be a valid address"
         )
-        return self._account_balance.functions.settlePnlInClosedMarket(
+        return self.account_balance.functions.settlePnlInClosedMarket(
             trader,
             base_token
         ).call()

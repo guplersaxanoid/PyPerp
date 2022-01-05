@@ -4,6 +4,8 @@ from web3 import Web3
 import pkgutil
 from eth_account import Account
 import json
+
+
 class ApiProvider:
 
     abi_dir: str
@@ -15,7 +17,7 @@ class ApiProvider:
     ):
         '''
         Initialize endpoint and account.
-        Argument: 
+        Argument:
         endpoint - Endpoint URL of RPC provider'
         account - Account object to manage keypair
         '''
@@ -34,7 +36,8 @@ class ApiProvider:
         elif protocol == 'ws' or protocol == 'wss':
             provider = Web3.WebsocketProvider(endpoint)
         else:
-            raise ValueError(f'Unknown protocol in the given endpoint: "{endpoint}"')
+            raise ValueError(
+                f'Unknown protocol in the given endpoint: "{endpoint}"')
         return Web3(provider)
 
     @property
@@ -53,8 +56,10 @@ class ApiProvider:
         '''
         try:
             return json.loads(
-                pkgutil.get_data(__name__,f"../abi/{self.abi_dir}/{contract_name}.json")
+                pkgutil.get_data(
+                    __name__, f"../abi/{self.abi_dir}/{contract_name}.json")
             )
-        except:
-            print(f"contract not found: abi/{self.abi_dir}/{contract_name}.json")
+        except BaseException:
+            print(
+                f"contract not found: abi/{self.abi_dir}/{contract_name}.json")
             return

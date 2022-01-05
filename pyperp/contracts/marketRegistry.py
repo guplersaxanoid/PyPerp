@@ -21,12 +21,12 @@ class MarketRegistry:
         self.logger = logging.getLogger("MarketRegistry")
 
         self.logger.info("Loading MarketRegistry Contract")
-        _market_registry_meta = self._provider.load_meta(
+        market_registry_meta = self._provider.load_meta(
             "MarketRegistry"
         )
-        self._market_registry = self._provider.api.eth.contract(
-            address=_market_registry_meta["address"],
-            abi=_market_registry_meta["abi"]
+        self.market_registry = self._provider.api.eth.contract(
+            address=market_registry_meta["address"],
+            abi=market_registry_meta["abi"]
         )
         self.logger.info("MarketRegistry Contract Loaded")
 
@@ -34,19 +34,19 @@ class MarketRegistry:
         '''
         Returns address of quote token contract.
         '''
-        return self._market_registry.functions.getQuoteToken().call()
+        return self.market_registry.functions.getQuoteToken().call()
 
     def get_uniswap_v3_factory(self):
         '''
         Returns address of UniswapV3Factory contract.
         '''
-        return self._market_registry.functions.getUniswapV3Factory().call()
+        return self.market_registry.functions.getUniswapV3Factory().call()
 
     def get_max_orders_per_market(self):
         '''
         Returns maximum orders per market.
         '''
-        return self._market_registry.functions.getMaxOrdersPerMarket(
+        return self.market_registry.functions.getMaxOrdersPerMarket(
         ).call()
 
     def get_pool(
@@ -58,7 +58,7 @@ class MarketRegistry:
         Arguments:
         base_token - contract address of base token
         '''
-        return self._market_registry.functions.getPool(
+        return self.market_registry.functions.getPool(
             base_token
         ).call()
 
@@ -71,7 +71,7 @@ class MarketRegistry:
         Argments:
         base_token - contract address of base token
         '''
-        return self._market_registry.functions.getFeeRatio(
+        return self.market_registry.functions.getFeeRatio(
             base_token
         ).call()
 
@@ -84,7 +84,7 @@ class MarketRegistry:
         Arguments:
         base_token - contract address of base token
         '''
-        return self._market_registry.functions.getInsuranceFundFeeRatio(
+        return self.market_registry.functions.getInsuranceFundFeeRatio(
             base_token
         ).call()
 
@@ -97,7 +97,7 @@ class MarketRegistry:
         Arguments:
         base_token - contract address of base token
         '''
-        resp = self._market_registry.functions.getMarketInfo(
+        resp = self.market_registry.functions.getMarketInfo(
             base_token
         ).call()
         return MarketInfo(*resp)

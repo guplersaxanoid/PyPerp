@@ -1,0 +1,9 @@
+site_name: PyPerp
+site_url: https://example.org
+nav:
+    - Introduction: index.md
+    - Quickstart: quickstart.md
+    - Providers: providers.md
+    - Contracts: contracts.md
+    - Common: common.md
+theme: readthedocs

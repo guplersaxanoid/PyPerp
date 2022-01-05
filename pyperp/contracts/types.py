@@ -1,5 +1,7 @@
 from dataclasses import dataclass
 from hexbytes import HexBytes
+
+
 @dataclass
 class OpenPositionParams:
     base_token: str
@@ -23,7 +25,6 @@ class OpenPositionParams:
             'referralCode': self.referral_code
         }
 
-    
 
 @dataclass
 class ClosePositionParams:
@@ -42,6 +43,7 @@ class ClosePositionParams:
             "referralCode": self.referral_code
         }
 
+
 @dataclass
 class AddLiquidityParams:
     base_token: str
@@ -59,13 +61,14 @@ class AddLiquidityParams:
             'baseToken': self.base_token,
             'base': self.base,
             'quote': self.quote,
-            'lowerTick': self.lowerTick,
-            'upperTick': self.upperTick,
+            'lowerTick': self.lower_tick,
+            'upperTick': self.upper_tick,
             'minBase': self.min_base,
-            'minQuote': self.minQuote,
-            'useTakerBalance': self.useTakerBalance,
+            'minQuote': self.min_quote,
+            'useTakerBalance': self.use_taker_balance,
             'deadline': self.deadline
         }
+
 
 @dataclass
 class RemoveLiquidityParams:
@@ -80,13 +83,14 @@ class RemoveLiquidityParams:
     def to_dict(self):
         return {
             'baseToken': self.base_token,
-            'lowerTick': self.lowerTick,
-            'upperTick': self.upperTick,
+            'lowerTick': self.lower_tick,
+            'upperTick': self.upper_tick,
             'liquidity': self.liquidity,
             'minBase': self.min_base,
-            'minQuote': self.minQuote,
+            'minQuote': self.min_quote,
             'deadline': self.deadline
         }
+
 
 @dataclass
 class MarketInfo:
@@ -95,7 +99,7 @@ class MarketInfo:
     uniswap_fee_ratio: int
     insurance_fund_fee_ratio: int
 
-    def  to_dict(self):
+    def to_dict(self):
         return {
             "pool": self.pool,
             "exchangeFeeRatio": self.exchange_fee_ratio,
@@ -117,9 +121,9 @@ class OpenOrderInfo:
     quote_debt: int
 
     def from_tuple(self, t):
-        #TODO: implement field looping
+        # TODO: implement field looping
         return
-    
+
     def to_dict(self):
         return {
             'liquidity': self.liquidity,
@@ -129,9 +133,10 @@ class OpenOrderInfo:
             'lastTwPremiumGrowthInsideX96': self.last_tw_premium_growth_inside_x96,
             'lastTwPremiumGrowthBelowX96': self.last_tw_premium_growth_below_x96,
             'lastTwPremiumDivBySqrtPriceGrowthInsideX96': self.last_tw_premium_div_by_sqrt_price_growth_inside_x96,
-            'baseDebt': base_debt,
-            'quoteDebt': quote_debt
+            'baseDebt': self.base_debt,
+            'quoteDebt': self.quote_debt
         }
+
 
 @dataclass
 class FundingGrowth:
@@ -143,6 +148,7 @@ class FundingGrowth:
             'twPremiumX96': self.tw_premium_x96,
             'twPremiumDivBySqrtPriceX96': self.tw_premium_div_by_sqrt_price_x96
         }
+
 
 @dataclass
 class AccountMarketInfo:
