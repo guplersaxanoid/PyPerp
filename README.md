@@ -10,7 +10,7 @@ From PyPi:
 
 ## Documentation
 
-The complete documentation is available [here](https://pyperp.readthedocs.io/en/latest/)
+The complete documentation is available [here](https://developerinprogress.github.io/PyPerp/)
 
 ## Example Code
 
