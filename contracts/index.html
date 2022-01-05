@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<!--[if IE 8]><html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="en" > <!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  
+  
+  <link rel="canonical" href="https://pyperp.readthedocs.io/en/latest/contracts/">
+  <link rel="shortcut icon" href="../img/favicon.ico">
+  <title>Contracts - PyPerp</title>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Lato:400,700|Roboto+Slab:400,700|Inconsolata:400,700" />
+
+  <link rel="stylesheet" href="../css/theme.css" />
+  <link rel="stylesheet" href="../css/theme_extra.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/styles/github.min.css" />
+  
+  <script>
+    // Current page data
+    var mkdocs_page_name = "Contracts";
+    var mkdocs_page_input_path = "contracts.md";
+    var mkdocs_page_url = "/en/latest/contracts/";
+  </script>
+  
+  <script src="../js/jquery-2.1.1.min.js" defer></script>
+  <script src="../js/modernizr-2.8.3.min.js" defer></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/10.5.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script> 
+</head>
+
+<body class="wy-body-for-nav" role="document">
+
+  <div class="wy-grid-for-nav">
+
+    
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side stickynav">
+    <div class="wy-side-scroll">
+      <div class="wy-side-nav-search">
+        <a href=".." class="icon icon-home"> PyPerp</a>
+        <div role="search">
+  <form id ="rtd-search-form" class="wy-form" action="../search.html" method="get">
+      <input type="text" name="q" placeholder="Search docs" title="Type search term here" />
+  </form>
+</div>
+      </div>
+
+      <div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="main navigation">
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="..">Introduction</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../quickstart/">Quickstart</a>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../providers/">Providers</a>
+                    </li>
+                </ul>
+                <ul class="current">
+                    <li class="toctree-l1 current"><a class="reference internal current" href="./">Contracts</a>
+    <ul class="current">
+    <li class="toctree-l2"><a class="reference internal" href="#accountbalance">AccountBalance</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#importing">Importing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#properties">Properties</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#methods">Methods</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#get_base_tokens">get_base_tokens</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_account_info">get_account_info</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_taker_open_notional">get_taker_open_notional</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_total_open_notional">get_total_open_notional</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_total_debt_value">get_total_debt_value</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_marginal_requirement_for_liquidation">get_marginal_requirement_for_liquidation</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_pnl_and_pending_fee">get_pnl_and_pending_fee</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#has_order">has_order</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#has_order_in_open_or_closed_market">has_order_in_open_or_closed_market</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_base">get_base</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_quote">get_quote</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_taker_position_size">get_taker_position_size</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_total_position_size">get_total_position_size</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_total_position_value">get_total_position_value</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_total_abs_positon_value">get_total_abs_positon_value</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#settle_pnl_closed_market">settle_pnl_closed_market</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#clearinghouse">ClearingHouse</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#importing_1">Importing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#properties_1">Properties</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#methods_1">Methods</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#add_liquidity">add_liquidity</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#remove_liquidity">remove_liquidity</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#settle_all_funding">settle_all_funding</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#open_position">open_position</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#close_position">close_position</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#liquidate">liquidate</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#cancel_all_excess_order">cancel_all_excess_order</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#close_position_in_closed_market">close_position_in_closed_market</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#uniswap_v3_mint_callback">uniswap_v3_mint_callback</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#uniswap_v3_swap_callback">uniswap_v3_swap_callback</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_quote_token">get_quote_token</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_uniswap_v3_factory">get_uniswap_v3_factory</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_clearing_house_config">get_clearing_house_config</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_vault">get_vault</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_exchange">get_exchange</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_order_book">get_order_book</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_account_balance">get_account_balance</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_insurance_fund">get_insurance_fund</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_account_value">get_account_value</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#marketregistry">MarketRegistry</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#importing_2">Importing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#properties_2">Properties</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#methods_2">Methods</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#get_quote_token_1">get_quote_token</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_uniswap_v3_factory_1">get_uniswap_v3_factory</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_max_order_per_market">get_max_order_per_market</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_pool">get_pool</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_insurance_fund_fee_ratio">get_insurance_fund_fee_ratio</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_market_info">get_market_info</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#orderbook">OrderBook</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#importing_3">Importing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#properties_3">Properties</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#methods_3">Methods</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#get_exchange_1">get_exchange</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_open_order_ids">get_open_order_ids</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_open_order_by_id">get_open_order_by_id</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_open_order">get_open_order</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#has_order_1">has_order</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_total_quote_balance_and_pending_fee">get_total_quote_balance_and_pending_fee</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_total_token_amount_in_pool_and_pending_fee">get_total_token_amount_in_pool_and_pending_fee</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_liquidity_coefficient_in_funding_payment">get_liquidity_coefficient_in_funding_payment</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_pending_fee">get_pending_fee</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_total_order_debt">get_total_order_debt</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#vault">Vault</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#importing_4">Importing</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#properties_4">Properties</a>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#methods_4">Methods</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#approve_vault_to_use_usdc">approve_vault_to_use_usdc</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#deposit">deposit</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#deposit_for">deposit_for</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#withdraw">withdraw</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_settlement_token">get_settlement_token</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#decimals">decimals</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_total_debt">get_total_debt</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_clearing_house_config_1">get_clearing_house_config</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_account_balance_1">get_account_balance</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_insurance_fund_1">get_insurance_fund</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_exchange_2">get_exchange</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_clearing_house">get_clearing_house</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_free_collateral">get_free_collateral</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_balance">get_balance</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#get_free_collateral_by_ratio">get_free_collateral_by_ratio</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l2"><a class="reference internal" href="#types">types</a>
+        <ul>
+    <li class="toctree-l3"><a class="reference internal" href="#openpositionparams">OpenPositionParams</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#importing_5">Importing</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#fields">Fields</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#closepositionparams">ClosePositionParams</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#importing_6">Importing</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#fields_1">Fields</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#addliquidityparams">AddLiquidityParams</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#importing_7">Importing</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#fields_2">Fields</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#removeliquidityparams">RemoveLiquidityParams</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#importing_8">Importing</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#fields_3">Fields</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#marketinfo">MarketInfo</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#importing_9">Importing</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#fields_4">Fields</a>
+    </li>
+        </ul>
+    </li>
+    <li class="toctree-l3"><a class="reference internal" href="#openorderinfo">OpenOrderInfo</a>
+        <ul>
+    <li class="toctree-l4"><a class="reference internal" href="#importing_10">Importing</a>
+    </li>
+    <li class="toctree-l4"><a class="reference internal" href="#fields_5">Fields</a>
+    </li>
+        </ul>
+    </li>
+        </ul>
+    </li>
+    </ul>
+                    </li>
+                </ul>
+                <ul>
+                    <li class="toctree-l1"><a class="reference internal" href="../common/">Common</a>
+                    </li>
+                </ul>
+      </div>
+    </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap">
+
+      
+      <nav class="wy-nav-top" role="navigation" aria-label="top navigation">
+        <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+        <a href="..">PyPerp</a>
+      </nav>
+
+      
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="breadcrumbs navigation">
+  <ul class="wy-breadcrumbs">
+    <li><a href="..">Docs</a> &raquo;</li>
+    
+      
+    
+    <li>Contracts</li>
+    <li class="wy-breadcrumbs-aside">
+      
+    </li>
+  </ul>
+  
+  <hr/>
+</div>
+
+          <div role="main">
+            <div class="section">
+              
+                <h1 id="contracts">Contracts</h1>
+<p>Contract classes interfaces with smart contracts of v2 curie</p>
+<h2 id="accountbalance">AccountBalance</h2>
+<p>The AccountBalance class interfaces with the AccountBalance contract</p>
+<h3 id="importing">Importing</h3>
+<pre><code>from pyperp.contracts import AccountBalance
+</code></pre>
+<h3 id="properties">Properties</h3>
+<p><code>account_balance</code>: Web3.eth.contract() object for AccountBalance contract</p>
+<h3 id="methods">Methods</h3>
+<h4 id="get_base_tokens">get_base_tokens</h4>
+<p>Returns a list of base tokens owned by trader</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: Wallet address of trader</p>
+<h4 id="get_account_info">get_account_info</h4>
+<p>Returns account info of trader with respect to a base token</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<p><strong>Return Value:</strong>
+Returns <code>pyperp.contracts.types.AccountMarketInfo</code> object</p>
+<h4 id="get_taker_open_notional">get_taker_open_notional</h4>
+<p>Returns taker open notional of trader with respect to a base token</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_total_open_notional">get_total_open_notional</h4>
+<p>Returns total open notional of trader with respect to a base token</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_total_debt_value">get_total_debt_value</h4>
+<p>Returns total debt value of a trader</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<h4 id="get_marginal_requirement_for_liquidation">get_marginal_requirement_for_liquidation</h4>
+<p>Returns marginal requirement for liquidation</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<h4 id="get_pnl_and_pending_fee">get_pnl_and_pending_fee</h4>
+<p>Returns PNL and Pending fee for a trader</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><strong>Return Value:</strong></p>
+<p>Returns a dict of the following format:</p>
+<pre><code>{
+    'owed_realized_pnl': &lt;INT_VALUE&gt;,
+    'unrealized_pnl': &lt;INT_VALUE&gt;,
+    'pending_fee':&lt;INT_VALUE&gt;
+}
+</code></pre>
+<h4 id="has_order">has_order</h4>
+<p>Checks if a trader has an open order</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><strong>Return Value:</strong></p>
+<p><code>True</code>: If there are open orders
+<code>False</code>: If there are no open orders</p>
+<h4 id="has_order_in_open_or_closed_market">has_order_in_open_or_closed_market</h4>
+<p>Checks if a trader has orders in open or closed market</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><strong>Return Value:</strong></p>
+<p><code>True</code>: If there are orders
+<code>False</code>: If there are no orders</p>
+<h4 id="get_base">get_base</h4>
+<p>Return amount of base token owned in terms of base</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_quote">get_quote</h4>
+<p>Return amount of base token owned in terms of quote</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_taker_position_size">get_taker_position_size</h4>
+<p>Returns taker position size</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_total_position_size">get_total_position_size</h4>
+<p>Returns total position size</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_total_position_value">get_total_position_value</h4>
+<p>Returns total position value</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_total_abs_positon_value">get_total_abs_positon_value</h4>
+<p>Returns total absolute position value</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<h4 id="settle_pnl_closed_market">settle_pnl_closed_market</h4>
+<p>Settle PNL in closed market</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<h2 id="clearinghouse">ClearingHouse</h2>
+<p>This class interfaces with the ClearingHouse contract</p>
+<h3 id="importing_1">Importing</h3>
+<pre><code>from pyperp.contracts import ClearingHouse
+</code></pre>
+<h3 id="properties_1">Properties</h3>
+<p><code>clearing_house</code>: <code>Web3.eth.contract()</code> object for ClearingHouse contract</p>
+<p><code>usdc</code>: <code>Web3.eth.contract()</code> object for USDC contract</p>
+<p><code>vbtc</code>: <code>Web3.eth.contract()</code> object for vBTC contract</p>
+<p><code>veth</code>: <code>Web3.eth.contract()</code> object for vETH contract</p>
+<h3 id="methods_1">Methods</h3>
+<h4 id="add_liquidity">add_liquidity</h4>
+<p>Add liquidity to a token</p>
+<p><strong>Arguments:</strong></p>
+<p><code>params</code>: <code>AddLiquidityParams</code> object</p>
+<p><code>gas_params</code>: <code>GasParams</code> object</p>
+<h4 id="remove_liquidity">remove_liquidity</h4>
+<p>Remove liquidity from a token</p>
+<p><strong>Arguments:</strong></p>
+<p><code>params</code>: <code>RemoveLiquidityParams</code> object</p>
+<p><code>gas_params</code>: <code>GasParams</code> object</p>
+<h4 id="settle_all_funding">settle_all_funding</h4>
+<p>Settle all funding</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>gas_params</code>: <code>GasParams</code> object\</p>
+<h4 id="open_position">open_position</h4>
+<p>Open Position</p>
+<p><strong>Arguments:</strong></p>
+<p><code>params</code>: <code>OpenPositionParams</code> object</p>
+<p><code>gas_params</code>: <code>GasParams</code> object</p>
+<h4 id="close_position">close_position</h4>
+<p>Close position</p>
+<p><strong>Arguments:</strong></p>
+<p><code>params</code>: <code>ClosePosition</code> object</p>
+<p><code>gas_params</code>: <code>GasParams</code> object</p>
+<h4 id="liquidate">liquidate</h4>
+<p>Liquidate</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<p><code>gas_params</code>: <code>GasParams</code> object</p>
+<h4 id="cancel_all_excess_order">cancel_all_excess_order</h4>
+<p>Cancel all excess orders</p>
+<p><strong>Arguments:</strong></p>
+<p><code>maker</code>: wallet address of maker</p>
+<p><code>base_token</code>: contract address of base token</p>
+<p><code>gas_params</code>: <code>GasParams</code> object</p>
+<h4 id="close_position_in_closed_market">close_position_in_closed_market</h4>
+<p>Close position in closed market</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<p><code>gas_params</code>: <code>GasParams</code> object</p>
+<h4 id="uniswap_v3_mint_callback">uniswap_v3_mint_callback</h4>
+<p>Uniswap V3 mint callback</p>
+<p><strong>Arguments:</strong></p>
+<p><code>amount0Owed</code>: integer
+<code>amount1owed</code>: integer
+<code>data</code>: string
+<code>gas_parmas</code>: A GasParams object</p>
+<h4 id="uniswap_v3_swap_callback">uniswap_v3_swap_callback</h4>
+<p>Uniswap V3 swap callback</p>
+<p><strong>Arguments:</strong></p>
+<p><code>amount0Delta</code>: integer
+<code>amount1Delta</code>: integer
+<code>data</code>: string
+<code>gas_params</code>: <code>GasParams</code> object</p>
+<h4 id="get_quote_token">get_quote_token</h4>
+<p>Returns quote token contract address</p>
+<h4 id="get_uniswap_v3_factory">get_uniswap_v3_factory</h4>
+<p>Returns UniswapV3Factory contract address</p>
+<h4 id="get_clearing_house_config">get_clearing_house_config</h4>
+<p>Return ClearingHouseConfig contract adderss</p>
+<h4 id="get_vault">get_vault</h4>
+<p>Return Vault contract address</p>
+<h4 id="get_exchange">get_exchange</h4>
+<p>Return Exchange contract address</p>
+<h4 id="get_order_book">get_order_book</h4>
+<p>Return OrderBook contract address</p>
+<h4 id="get_account_balance">get_account_balance</h4>
+<p>Return AccountBalance contract address</p>
+<h4 id="get_insurance_fund">get_insurance_fund</h4>
+<p>Return InsuranceFund contract address</p>
+<h4 id="get_account_value">get_account_value</h4>
+<p>Return account value of a trader</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<h2 id="marketregistry">MarketRegistry</h2>
+<p>This class interfaces with the MarketRegistry smart contract</p>
+<h3 id="importing_2">Importing</h3>
+<pre><code>from pyperp.contracts import MarketRegistry
+</code></pre>
+<h3 id="properties_2">Properties</h3>
+<p><code>market_registry</code>: <code>Web3.eth.contract</code> object for MarketRegistry contract</p>
+<h3 id="methods_2">Methods</h3>
+<h4 id="get_quote_token_1">get_quote_token</h4>
+<p>Returns quote token contract address</p>
+<h4 id="get_uniswap_v3_factory_1">get_uniswap_v3_factory</h4>
+<p>Returns UniswapV3Factory contract address</p>
+<h4 id="get_max_order_per_market">get_max_order_per_market</h4>
+<p>Returns maximum orders per market</p>
+<h4 id="get_pool">get_pool</h4>
+<p>Returns pool address of a base token</p>
+<p><strong>Arguments:</strong></p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_insurance_fund_fee_ratio">get_insurance_fund_fee_ratio</h4>
+<p>Returns insurance fund fee ratio for a base token</p>
+<p><strong>Arguments:</strong></p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_market_info">get_market_info</h4>
+<p>Returns market info for a base token</p>
+<p><strong>Arguments:</strong></p>
+<p><code>base_token</code>: contract address of base token</p>
+<p><strong>Return Value:</strong></p>
+<p>A <code>pyperp.contracts.types.MarketInfo</code> object</p>
+<h2 id="orderbook">OrderBook</h2>
+<p>This class interfaces with the OrderBook smart contract</p>
+<h3 id="importing_3">Importing</h3>
+<pre><code>from pyperp.contracts import OrderBook
+</code></pre>
+<h3 id="properties_3">Properties</h3>
+<p><code>order_book</code>: <code>Web3.eth.contract</code> object for OrderBook contract</p>
+<h3 id="methods_3">Methods</h3>
+<h4 id="get_exchange_1">get_exchange</h4>
+<p>Returns Exchange contract address</p>
+<h4 id="get_open_order_ids">get_open_order_ids</h4>
+<p>Returns open order ids of a trader with respect to a base token</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<p><code>base_token</code>: contract address of base token</p>
+<h4 id="get_open_order_by_id">get_open_order_by_id</h4>
+<p>Returns open order info</p>
+<p><strong>Arguments:</strong></p>
+<p><code>order_id</code>: HexBytes object representing order id</p>
+<p><strong>Return Value":</strong></p>
+<p>Returns <code>pyperp.contracts.types.OpenOrderInfo</code> object</p>
+<h4 id="get_open_order">get_open_order</h4>
+<p>Returns open order</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of a trader
+<code>base_token</code>: contract address of a base token
+<code>lower_tick</code>: lower tick
+<code>upper_tick</code>: upper tick"</p>
+<p><strong>Return Value:</strong></p>
+<p>Returns <code>pyperp.contracts.types.OpenOrderInfo</code> object</p>
+<h4 id="has_order_1">has_order</h4>
+<p>Checks if a trader has any open order</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of a trader
+<code>tokens</code>: list of token addresses</p>
+<h4 id="get_total_quote_balance_and_pending_fee">get_total_quote_balance_and_pending_fee</h4>
+<p>Returns total quote balance and pending fee</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader
+<code>base_token</code>: contract address of token</p>
+<p><strong>Return Value:</strong></p>
+<p>Returns a dict of following format:</p>
+<pre><code>{
+    'total_quote_amount_in_pools': &lt;INT_VALUE&gt;,
+    'total_pending_fee': &lt;INT_VALUE&gt;
+}
+</code></pre>
+<h4 id="get_total_token_amount_in_pool_and_pending_fee">get_total_token_amount_in_pool_and_pending_fee</h4>
+<p>Returns total token amount and pending fee.</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader
+<code>base_token</code>: contract address of base token
+<code>fetch_base</code>: fetch base</p>
+<p><strong>Return Value:</strong></p>
+<p>Returns a dict of following format:</p>
+<pre><code>{
+    'token_amount': &lt;INT_VALUE&gt;,
+    'pending_fee': &lt;INT_VALUE&gt;
+}
+</code></pre>
+<h4 id="get_liquidity_coefficient_in_funding_payment">get_liquidity_coefficient_in_funding_payment</h4>
+<p>Returns liquidity coefficient in funding payment</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader
+<code>base_token</code>: contract address of base token
+<code>funding_growth_global</code>: FundingGrowth object"</p>
+<h4 id="get_pending_fee">get_pending_fee</h4>
+<p>Returns pending fee.</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader
+<code>base_token</code>: contract address of base token
+<code>lower_tick</code>: lower tick
+<code>upper_tick</code>: upper tick</p>
+<h4 id="get_total_order_debt">get_total_order_debt</h4>
+<p>Returns total order debt.</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader
+<code>base_token</code>: contract address of base token
+<code>fetch_base</code>: fetch base</p>
+<h2 id="vault">Vault</h2>
+<p>This class interfaces with the Vault contract</p>
+<h3 id="importing_4">Importing</h3>
+<pre><code>from pyperp.contracts.vault import Vault
+</code></pre>
+<h3 id="properties_4">Properties</h3>
+<p><code>vault</code>: <code>Web3.eth.contract</code> object of Vault contract</p>
+<p><code>usdc</code>: <code>Web3.eth.contract</code> object of USDC contract</p>
+<h3 id="methods_4">Methods</h3>
+<h4 id="approve_vault_to_use_usdc">approve_vault_to_use_usdc</h4>
+<p>Approves Vault contract to use USDC from trader's wallet</p>
+<p><strong>Arguments:</strong></p>
+<p><code>gas_params</code>: A <code>pyperp.common.types.GasParams</code> object</p>
+<h4 id="deposit">deposit</h4>
+<p>Deposit collateral amount.</p>
+<p><strong>Arguments:</strong></p>
+<p><code>token</code>: Token address
+<code>amount_x10_D</code>: amount to deposit
+<code>gas_params</code>: A <code>pyperp.common.types.GasParams</code> object</p>
+<h4 id="deposit_for">deposit_for</h4>
+<p>Deposit collateral for a different address.</p>
+<p><strong>Arguments:</strong></p>
+<p><code>to</code>: wallet address to deposit to
+<code>token</code>: contract address of token
+<code>amount_x10_D</code>: amount to deposit
+<code>gas_params</code>: A <code>pyperp.common.types.GasParams</code> object</p>
+<h4 id="withdraw">withdraw</h4>
+<p>Withdraw collateral amount.</p>
+<p><strong>Arguments:</strong></p>
+<p><code>token</code>: Token address
+<code>amount_x10_D</code>: amount to withdraw
+<code>gas_params</code>: GasParams object</p>
+<h4 id="get_settlement_token">get_settlement_token</h4>
+<p>Returns settlement token address.</p>
+<h4 id="decimals">decimals</h4>
+<p>Returns number of decimals.</p>
+<h4 id="get_total_debt">get_total_debt</h4>
+<p>Returns total debt.</p>
+<h4 id="get_clearing_house_config_1">get_clearing_house_config</h4>
+<p>Returns contract address of ClearingHouseConfig.</p>
+<h4 id="get_account_balance_1">get_account_balance</h4>
+<p>Returns contract address of AccountBalance</p>
+<h4 id="get_insurance_fund_1">get_insurance_fund</h4>
+<p>Returns contract address of InsuranceFund</p>
+<h4 id="get_exchange_2">get_exchange</h4>
+<p>Returns contract address of Exchange</p>
+<h4 id="get_clearing_house">get_clearing_house</h4>
+<p>Returns contract address of ClearingHouse</p>
+<h4 id="get_free_collateral">get_free_collateral</h4>
+<p>Check how much collateral a trader can withdraw.</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet adderss of trader</p>
+<h4 id="get_balance">get_balance</h4>
+<p>Returns vault balance of trader.</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader</p>
+<h4 id="get_free_collateral_by_ratio">get_free_collateral_by_ratio</h4>
+<p>Returns free collateral by ratio.</p>
+<p><strong>Arguments:</strong></p>
+<p><code>trader</code>: wallet address of trader
+<code>ratio</code>: ratio</p>
+<h2 id="types">types</h2>
+<p>Contains dataclasses for use in parameters and return types</p>
+<h3 id="openpositionparams">OpenPositionParams</h3>
+<p>Used as parameter in <code>pyperp.contracts.ClearingHouse.open_position()</code> function</p>
+<h4 id="importing_5">Importing</h4>
+<pre><code>from pyperp.contracts.types import OpenPositionParams
+</code></pre>
+<h4 id="fields">Fields</h4>
+<p><code>base_token</code>: base token address</p>
+<p><code>is_base_to_quote</code>: Boolean. Takes <code>True</code> or <code>False</code>.</p>
+<p><code>is_exact_input</code>: Boolean. Takes <code>True</code> or <code>False</code>.</p>
+<p><code>amount</code>: integer amount value.</p>
+<p><code>opposite_amount_bound</code>: integer <code>OppositeAmountBound</code> value</p>
+<p><code>deadline</code>: UNIX time to be used as deadline for trade</p>
+<p><code>sqrt_price_limit_x96</code>: integer <code>sqrtPriceLimitX96</code> value</p>
+<p><code>referral_code</code>: HexBytes representing <code>ReferralCode</code>. Defaults to 0.</p>
+<h3 id="closepositionparams">ClosePositionParams</h3>
+<p>Used as parameter in <code>pyperp.contracts.ClearingHouse.close_position()</code> function</p>
+<h4 id="importing_6">Importing</h4>
+<pre><code>from pyperp.contracts.types import ClosePositionParams
+</code></pre>
+<h4 id="fields_1">Fields</h4>
+<p><code>base_token</code>: base token address</p>
+<p><code>sqrt_price_limit_x96</code>: integer <code>sqrtPriceLimitX96</code> value</p>
+<p><code>opposite_amount_bound</code>: integer <code>OppositeAmountBound</code> value</p>
+<p><code>deadline</code>: UNIX time to be used as deadline for trade</p>
+<p><code>referral_code</code>: HexBytes representing <code>ReferralCode</code>. Defaults to 0.</p>
+<h3 id="addliquidityparams">AddLiquidityParams</h3>
+<p>Used as parameter in <code>pyperp.contracts.ClearingHouse.add_liquidity()</code> function</p>
+<h4 id="importing_7">Importing</h4>
+<pre><code>from pyperp.contracts.types import AddLiquidityParams
+</code></pre>
+<h4 id="fields_2">Fields</h4>
+<p><code>base_token</code>: Contract address of base token</p>
+<p><code>base</code>: base amount to add</p>
+<p><code>quote</code>: quote amount to add</p>
+<p><code>lower_tick</code>: <code>lowerTick</code> value</p>
+<p><code>upper_tick</code>: <code>upperTick</code> value</p>
+<p><code>min_base</code>: <code>minBase</code> value</p>
+<p><code>min_quote</code>: <code>minQuote</code> value</p>
+<p><code>deadline</code>: UNIX time to be used as deadline for trade</p>
+<h3 id="removeliquidityparams">RemoveLiquidityParams</h3>
+<p>Used as parameter in <code>pyperp.contracts.ClearingHouse.remove_liquidity()</code> function</p>
+<h4 id="importing_8">Importing</h4>
+<pre><code>from pyperp.contracts.types import RemoveLiquidityParams
+</code></pre>
+<h4 id="fields_3">Fields</h4>
+<p><code>base_token</code>: Contract address of base token</p>
+<p><code>lower_tick</code>: <code>lowerTick</code> value</p>
+<p><code>upper_tick</code>: <code>upperTick</code> value</p>
+<p><code>liquidity</code>: integer liquidity value</p>
+<p><code>min_base</code>: <code>minBase</code> value</p>
+<p><code>min_quote</code>: <code>minQuote</code> value</p>
+<p><code>deadline</code>: UNIX time to be used as deadline for trade</p>
+<h3 id="marketinfo">MarketInfo</h3>
+<p>Used as return type in <code>pyperp.contracts.MarketRegistry.get_market_info()</code></p>
+<h4 id="importing_9">Importing</h4>
+<pre><code>from pyperp.contracts.types import MarketInfo
+</code></pre>
+<h4 id="fields_4">Fields</h4>
+<p><code>pool</code>: Pool address
+<code>exchange_fee_ratio</code>: Exchange Fee ratio
+<code>uniswap_fee_ratio</code>: Uniswap Fee ratio
+<code>insurance_fund_fee_ratio</code>: Insurance Fund Fee Ratio</p>
+<h3 id="openorderinfo">OpenOrderInfo</h3>
+<p>Used as return type in <code>pyperp.contracts.OrderBook.get_open_order()</code> and <code>pyperp.contracts.OrderBook.get_open_order_by_id()</code></p>
+<h4 id="importing_10">Importing</h4>
+<pre><code>from pyperp.contracts.types import OpenOrderInfo
+</code></pre>
+<h4 id="fields_5">Fields</h4>
+<p><code>liquidity</code>: Integer liquidity value</p>
+<p><code>lower_tick</code>: <code>lowerTick</code> value</p>
+<p><code>upper_tick</code>: <code>upperTick</code> value</p>
+<p><code>last_fee_growth_inside_x96</code>: <code>lastFeeGrowthInsideX96</code> value</p>
+<p><code>last_tw_premium_growth_inside_x96</code>: <code>lastTwPremiumGrowthInsideX96</code> value</p>
+<p><code>last_tw_premium_div_by_sqrt_price_growth_inside_x96</code>: <code>lastTwPremiumDivBySqrtPriceGrowthInsideX96</code> value</p>
+<p><code>base_debt</code>: Base debt value</p>
+<p><code>quote_debt</code>: Quote debt value</p>
+              
+            </div>
+          </div>
+          <footer>
+  
+    <div class="rst-footer-buttons" role="navigation" aria-label="footer navigation">
+      
+        <a href="../common/" class="btn btn-neutral float-right" title="Common">Next <span class="icon icon-circle-arrow-right"></span></a>
+      
+      
+        <a href="../providers/" class="btn btn-neutral" title="Providers"><span class="icon icon-circle-arrow-left"></span> Previous</a>
+      
+    </div>
+  
+
+  <hr/>
+
+  <div role="contentinfo">
+    <!-- Copyright etc -->
+    
+  </div>
+
+  Built with <a href="https://www.mkdocs.org/">MkDocs</a> using a <a href="https://github.com/snide/sphinx_rtd_theme">theme</a> provided by <a href="https://readthedocs.org">Read the Docs</a>.
+</footer>
+      
+        </div>
+      </div>
+
+    </section>
+
+  </div>
+
+  <div class="rst-versions" role="note" aria-label="versions">
+  <span class="rst-current-version" data-toggle="rst-current-version">
+    
+    
+      <span><a href="../providers/" style="color: #fcfcfc">&laquo; Previous</a></span>
+    
+    
+      <span><a href="../common/" style="color: #fcfcfc">Next &raquo;</a></span>
+    
+  </span>
+</div>
+    <script>var base_url = '..';</script>
+    <script src="../js/theme_extra.js" defer></script>
+    <script src="../js/theme.js" defer></script>
+      <script src="../search/main.js" defer></script>
+    <script defer>
+        window.onload = function () {
+            SphinxRtdTheme.Navigation.enable(true);
+        };
+    </script>
+
+</body>
+</html>

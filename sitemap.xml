@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://pyperp.readthedocs.io/en/latest/</loc>
+         <lastmod>2022-01-05</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://pyperp.readthedocs.io/en/latest/common/</loc>
+         <lastmod>2022-01-05</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://pyperp.readthedocs.io/en/latest/contracts/</loc>
+         <lastmod>2022-01-05</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://pyperp.readthedocs.io/en/latest/providers/</loc>
+         <lastmod>2022-01-05</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+    <url>
+         <loc>https://pyperp.readthedocs.io/en/latest/quickstart/</loc>
+         <lastmod>2022-01-05</lastmod>
+         <changefreq>daily</changefreq>
+    </url>
+</urlset>
